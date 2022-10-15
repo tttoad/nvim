@@ -13,6 +13,8 @@ require('packer').startup(function()
 	use "windwp/nvim-autopairs"
 	use 'preservim/tagbar'
 
+	use 'fatih/vim-go'
+
 	use 'neovim/nvim-lspconfig'
 	use 'hrsh7th/cmp-nvim-lsp'
 	use 'hrsh7th/cmp-buffer'
@@ -208,6 +210,11 @@ setVimKeyMap({
 	'noremap <c-x> <c-r>',
 })
 
+-- vim-go
+keymap('',"<F1>",":GoDocBrowser<CR>")
+keymap('n',"<leader><space>i",":GoImpl ")
+keymap('n',"<leader>fill",":GoFillStruct")
+
 -- nvim-cmp
 require("cmp_nvim_ultisnips").setup {}
 
@@ -255,8 +262,8 @@ cmp.setup({
 	}
 })
 
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities()) --nvim-cmp
-capabilities.textDocument.completion.completionItem.snippetSupport = true
+-- local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities()) --nvim-cmp
+-- capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 local on_attach = function(_, bufnr)
 	-- local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
@@ -277,7 +284,7 @@ local nvim_lsp = require('lspconfig')
 nvim_lsp['gopls'].setup {
 	cmd = { 'gopls' },
 	on_attach = on_attach,
-	capabilities = capabilities,
+--	capabilities = capabilities,
 	settings = {
 		gopls = {
 			experimentalPostfixCompletions = true,
@@ -334,6 +341,8 @@ nvim_lsp['sumneko_lua'].setup {
 		},
 	},
 }
+
+-- lsp-config
 
 local bufopts = { noremap = true, silent = true, buffer = bufnr }
 local opts = { noremap = true, silent = true }
@@ -542,7 +551,7 @@ dap.listeners.after.event_exited["dapui_config"] = function()
 	cmd("DapVirtualTextDisable")
 end
 
--- dapui.setup()
+dapui.setup()
 -- -- DAPInstall
 --
 -- local dap_install = require("dap-install")
