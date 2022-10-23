@@ -211,9 +211,12 @@ setVimKeyMap({
 })
 
 -- vim-go
-keymap('',"<F1>",":GoDocBrowser<CR>")
-keymap('n',"<leader><space>i",":GoImpl ")
-keymap('n',"<leader>fill",":GoFillStruct")
+keymap('', "<F1>", ":GoDocBrowser<CR>")
+keymap('n', "<leader><space>i", ":GoImpl ")
+keymap('n', "<leader>fill", ":GoFillStruct<CR>")
+keymap('n', "<leader>f", ":GoReferrers<CR>")
+keymap('n', "<leader>c", ":GoCallees<CR>")
+keymap('n', "<leader>tg", ":GoAddTags<CR>")
 
 -- nvim-cmp
 require("cmp_nvim_ultisnips").setup {}
@@ -284,7 +287,7 @@ local nvim_lsp = require('lspconfig')
 nvim_lsp['gopls'].setup {
 	cmd = { 'gopls' },
 	on_attach = on_attach,
---	capabilities = capabilities,
+	--	capabilities = capabilities,
 	settings = {
 		gopls = {
 			experimentalPostfixCompletions = true,
@@ -506,6 +509,10 @@ dap.configurations.go = {
 		program = "${file}";
 		-- dlvToolPath = vim.fn.exepath('dlv');  -- Adjust to where delve is installed
 		env = { LION_PASSWORD = '02b9NSUOo2QklZX2', env = "local" };
+		args = function()
+			local args_string = vim.fn.input('Arguments: ')
+			return vim.split(args_string, " +")
+		end;
 	},
 }
 --
