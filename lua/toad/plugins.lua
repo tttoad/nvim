@@ -399,6 +399,7 @@ cmp.setup.cmdline(':', {
 -- nvim-tree
 local tree_cb = require 'nvim-tree.config'.nvim_tree_callback
 keymap("", "<F2>", "<cmd> NvimTreeToggle<cr>")
+keymap("","<leader>af","<cmd> NvimTreeFindFile<cr>")
 
 local function print_node_path(node)
 	print(node.absolute_path)
@@ -493,19 +494,69 @@ dap.adapters.go = {
 -- 	}
 -- }
 --
--- dap.set_log_level('TRACE')
 -- dap.adapters.go = {
 -- 	type = 'executable';
 -- 	command = 'node';
 -- 	args = {'../vscode-go/dist/debugAdapter.js' };
 -- }
 
+-- 切分参数
+local function splitArgs(args)
+	local nextIndex = 0
+	local result = {}
+
+	for i = 1, #args do
+		local c = args:sub(i, i)
+		if i < nextIndex then
+			goto continue
+		end
+
+		if c ~= ' ' then
+			local find = false
+			for j = i, #args do
+				local cc = args:sub(j, j)
+				if j >= nextIndex then
+					if cc == '\"' then
+						local ends = args:find("\"", j + 1)
+						if ends == nil then
+							ends = args:len() - 1
+						end
+
+						nextIndex = ends + 1
+					else if cc == " " then
+							nextIndex = j
+							find = true
+							break
+						end
+					end
+				end
+			end
+
+			if not find then
+				nextIndex = args:len() + 1
+			end
+
+			if c == "\"" then
+				table.insert(result, args:sub(i+1, nextIndex-2))
+			else
+				table.insert(result, args:sub(i, nextIndex - 1))
+			end
+
+			goto continue
+		end
+		::continue::
+	end
+
+	return result
+end
+
+dap.set_log_level('TRACE')
 dap.configurations.go = {
 	{
 		type = 'go';
 		name = 'Debug';
 		request = 'launch';
-		showLog = false;
+		-- showLog = true;
 		program = "${file}";
 		-- dlvToolPath = vim.fn.exepath('dlv');  -- Adjust to where delve is installed
 		env = { LION_PASSWORD = '02b9NSUOo2QklZX2', env = "local" };
@@ -514,7 +565,24 @@ dap.configurations.go = {
 			return vim.split(args_string, " +")
 		end;
 	},
+	{
+		type = 'go';
+		name = 'Debug-workspace';
+		request = 'launch';
+		-- showLog = true;
+		program = "${workspaceFolder}";
+		-- dlvToolPath = vim.fn.exepath('dlv');  -- Adjust to where delve is installed
+		env = { LION_PASSWORD = '02b9NSUOo2QklZX2', env = "local" };
+		args = function()
+			local args_string = vim.fn.input('Arguments: ')
+			-- return vim.split(args_string, " +")
+			return splitArgs(args_string)
+		end;
+	},
+
 }
+
+
 --
 -- dap.configurations.go = {
 -- 	{
@@ -550,11 +618,11 @@ dap.listeners.after.event_initialized["dapui_config"] = function()
 	cmd("DapVirtualTextEnable")
 end
 dap.listeners.after.event_terminated["dapui_config"] = function()
-	dapui.close({})
+	-- dapui.close({})
 	cmd("DapVirtualTextDisable")
 end
 dap.listeners.after.event_exited["dapui_config"] = function()
-	dapui.close({})
+	-- dapui.close({})
 	cmd("DapVirtualTextDisable")
 end
 
@@ -619,7 +687,7 @@ require('gitsigns').setup({
 		-- Actions
 		map({ 'n', 'v' }, '<leader>hs', ':Gitsigns stage_hunk<CR>')
 		map({ 'n', 'v' }, '<leader>hr', ':Gitsigns reset_hunk<CR>')
-		map('n', '<leader>hS', gs.stage_buffer)
+		-- map('n', '<leader>hS', gs.stage_buffe)
 		map('n', '<leader>hu', gs.undo_stage_hunk)
 		map('n', '<leader>hR', gs.reset_buffer)
 		map('n', '<leader>hp', gs.preview_hunk)
@@ -852,5 +920,37 @@ setVimCommand({
 	"let g:floaterm_keymap_toggle ='<F12>'"
 })
 
+-- jsonnet
+require'lspconfig'.jsonnet_ls.setup{
+	ext_vars = {
+		foo = 'bar',
+	},
+	formatting = {
+		-- default values
+		Indent              = 2,
+		MaxBlankLines       = 2,
+		StringStyle         = 'single',
+		CommentStyle        = 'slash',
+		PrettyFieldNames    = true,
+		PadArrays           = false,
+		PadObjects          = true,
+		SortImports         = true,
+		UseImplicitPlus     = true,
+		StripEverything     = false,
+		StripComments       = false,
+		StripAllButComments = false,
+	},
+}
 
+-- josn
+--Enable (broadcasting) snippet capability for completion
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+
+require'lspconfig'.jsonls.setup {
+  capabilities = capabilities,
+}
+
+-- clang 
+require'lspconfig'.clangd.setup{}
 return
