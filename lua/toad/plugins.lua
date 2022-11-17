@@ -34,7 +34,6 @@ require('packer').startup(function()
 		"nvim-neotest/neotest",
 		requires = {
 			"nvim-lua/plenary.nvim",
-			"nvim-treesitter/nvim-treesitter",
 			"antoinemadec/FixCursorHold.nvim"
 		}
 	}
@@ -45,16 +44,16 @@ require('packer').startup(function()
 		requires = { 'kyazdani42/nvim-web-devicons', opt = true }
 	}
 
-	-- debug
-	use "ravenxrz/DAPInstall.nvim"
-	use 'mfussenegger/nvim-dap'
-	use 'theHamsta/nvim-dap-virtual-text'
-	use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
-
 	use {
 		'nvim-treesitter/nvim-treesitter',
 		run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
 	}
+	-- debug
+	use 'ravenxrz/DAPInstall.nvim'
+	use 'mfussenegger/nvim-dap'
+	use 'theHamsta/nvim-dap-virtual-text'
+	use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
+
 
 	use {
 		'lewis6991/gitsigns.nvim',
@@ -67,11 +66,12 @@ require('packer').startup(function()
 	-- 		'nvim-lua/plenary.nvim'
 	-- 	}
 	-- }
+	use 'p00f/nvim-ts-rainbow'
 
 	use 'mbbill/undotree'
 
 	-- markdown
-	-- use({ "iamcco/markdown-preview.nvim", run = "cd app && npm install", setup = function() vim.g.mkdp_filetypes = { "markdown" } end, ft = { "markdown" }, })
+	use 'iamcco/markdown-preview.nvim'
 
 	use 'numToStr/Comment.nvim'
 
@@ -399,7 +399,7 @@ cmp.setup.cmdline(':', {
 -- nvim-tree
 local tree_cb = require 'nvim-tree.config'.nvim_tree_callback
 keymap("", "<F2>", "<cmd> NvimTreeToggle<cr>")
-keymap("","<leader>af","<cmd> NvimTreeFindFile<cr>")
+keymap("", "<leader>af", "<cmd> NvimTreeFindFile<cr>")
 
 local function print_node_path(node)
 	print(node.absolute_path)
@@ -537,7 +537,7 @@ local function splitArgs(args)
 			end
 
 			if c == "\"" then
-				table.insert(result, args:sub(i+1, nextIndex-2))
+				table.insert(result, args:sub(i + 1, nextIndex - 2))
 			else
 				table.insert(result, args:sub(i, nextIndex - 1))
 			end
@@ -643,22 +643,29 @@ dapui.setup()
 -- tagbar
 keymap('', "<F3>", "<cmd> TagbarToggle<CR>")
 --
--- -- nvim-treesitter
--- require 'nvim-treesitter.configs'.setup {
--- 	-- A list of parser names, or "all"
--- 	ensure_installed = { "go" },
---
--- 	highlight = {
--- 		-- `false` will disable the whole extension
--- 		enable = true,
---
--- 		-- Setting this to true will run `:h syntax` and tree-sitter at the same time.
--- 		-- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
--- 		-- Using this option may slow down your editor, and you may see some duplicate highlights.
--- 		-- Instead of true it can also be a list of languages
--- 		additional_vim_regex_highlighting = false,
--- 	},
--- }
+-- nvim-treesitter
+require 'nvim-treesitter.configs'.setup {
+	-- A list of parser names, or "all"
+	ensure_installed = { "go", "c" },
+
+	highlight = {
+		-- `false` will disable the whole extension
+		enable = true,
+		disable = { "lua" },
+
+		-- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+		-- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+		-- Using this option may slow down your editor, and you may see some duplicate highlights.
+		-- Instead of true it can also be a list of languages
+		additional_vim_regex_highlighting = false,
+	},
+	rainbow = {
+		enable = true,
+		-- disable = { "jsx", "cpp" }, list of languages you want to disable the plugin for
+		extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
+		max_file_lines = nil, -- Do not enable for files with more than n lines, int
+	},
+}
 --
 -- gitsigns
 require('gitsigns').setup({
@@ -706,7 +713,7 @@ require('gitsigns').setup({
 -- require('vgit').setup()
 
 -- undotree
-keymap("n", "<leader>h", "<cmd>UndotreeToggle<cr>")
+keymap("n", "<leader>hh", "<cmd>UndotreeToggle<cr>")
 vim.cmd(
 	[[
 func SetUndodir()
@@ -921,7 +928,7 @@ setVimCommand({
 })
 
 -- jsonnet
-require'lspconfig'.jsonnet_ls.setup{
+require 'lspconfig'.jsonnet_ls.setup {
 	ext_vars = {
 		foo = 'bar',
 	},
@@ -947,10 +954,11 @@ require'lspconfig'.jsonnet_ls.setup{
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-require'lspconfig'.jsonls.setup {
-  capabilities = capabilities,
+require 'lspconfig'.jsonls.setup {
+	capabilities = capabilities,
 }
 
--- clang 
-require'lspconfig'.clangd.setup{}
+-- clang
+require 'lspconfig'.clangd.setup {}
+
 return
