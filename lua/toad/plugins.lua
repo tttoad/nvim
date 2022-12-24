@@ -60,12 +60,6 @@ require('packer').startup(function()
 		-- tag = 'release' -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
 	}
 
-	-- use {
-	-- 	'tanvirtin/vgit.nvim',
-	-- 	requires = {
-	-- 		'nvim-lua/plenary.nvim'
-	-- 	}
-	-- }
 	use 'p00f/nvim-ts-rainbow'
 
 	use 'mbbill/undotree'
@@ -102,46 +96,38 @@ end
 
 setVimCommand({
 	'set number',
-	--  搜索大小写不敏感
 	'set ignorecase',
 	'set encoding=UTF-8',
 	-- 'set number',
-	--  设置行会导致输入指令后乱码...
 	--set lines=60
 	--set columns=200
 	'set mouse=a',
 	'syntax on',
-	-- 突出当前行
 	'set cursorline',
 	'set laststatus=2',
-	-- 自动缩进',
 	--set autoindent',
 	'set tabstop=4',
 	'set smarttab',
 	'set shiftwidth=4',
 	'set softtabstop=4',
 	'set backspace=eol,start,indent',
-	-- 自动补全',
-	-- set complete=.,w,b,u,t,i',
 
 	'set showcmd',
 	'set whichwrap+=<,>,h,l',
-	-- 光标到底部距离',
 	'set scrolloff=3',
-	-- 历史记录',
 	'set history=1000',
-	-- 禁止生成临时文件',
 	'set nobackup',
-	-- 去除vi相关一致性模式',
 	'set nocompatible',
-	-- 设置vim日志',
-	-- set verbose=13',
 	-- set verbosefile=./vim.log',
 	'set cmdheight=2',
 	-- 'set completeopt-=preview',
 	'set completeopt=menu,menuone,noselect',
-	-- 左侧空列
-	'set signcolumn=yes'
+	'set signcolumn=yes',
+	'set autowriteall',
+
+	':autocmd InsertEnter * set cul',
+	':autocmd InsertLeave * set nocul'
+
 })
 
 local function split(str, reps)
@@ -208,6 +194,8 @@ setVimKeyMap({
 	'vnoremap <c-d> "+d',
 	'nmap <leader>v "+p',
 	'noremap <c-x> <c-r>',
+	'map <C-n> :cnext<CR>',
+	'map <C-m> :cprevious<CR>',
 })
 
 -- vim-go
@@ -414,6 +402,7 @@ require("nvim-tree").setup({
 				{ key = "u", action = "dir_up" },
 				{ key = "s", cb = tree_cb("split") },
 				{ key = "p", action = "print_path", action_cb = print_node_path },
+				{ key = "m", action = "" }
 			},
 		},
 	},
@@ -500,7 +489,7 @@ dap.adapters.go = {
 -- 	args = {'../vscode-go/dist/debugAdapter.js' };
 -- }
 
--- 切分参数
+-- parse args
 local function splitArgs(args)
 	local nextIndex = 0
 	local result = {}
@@ -559,29 +548,60 @@ dap.configurations.go = {
 		-- showLog = true;
 		program = "${file}";
 		-- dlvToolPath = vim.fn.exepath('dlv');  -- Adjust to where delve is installed
-		env = { LION_PASSWORD = '02b9NSUOo2QklZX2', env = "local" };
+	},
+	{
+		type = 'go';
+		name = 'Debug-args';
+		request = 'launch';
+		-- showLog = true;
+		program = "${file}";
+		-- dlvToolPath = vim.fn.exepath('dlv');  -- Adjust to where delve is installed
 		args = function()
 			local args_string = vim.fn.input('Arguments: ')
 			return vim.split(args_string, " +")
 		end;
 	},
+
 	{
 		type = 'go';
-		name = 'Debug-workspace';
+		name = 'workspace-args';
 		request = 'launch';
 		-- showLog = true;
 		program = "${workspaceFolder}";
 		-- dlvToolPath = vim.fn.exepath('dlv');  -- Adjust to where delve is installed
-		env = { LION_PASSWORD = '02b9NSUOo2QklZX2', env = "local" };
 		args = function()
 			local args_string = vim.fn.input('Arguments: ')
 			-- return vim.split(args_string, " +")
 			return splitArgs(args_string)
 		end;
 	},
-
+	{
+		type = 'delve';
+		name = 'remote';
+		request = 'launch';
+		mode = "debug";
+		-- showLog = true;
+		program = function()
+			return vim.fn.input('Program: ')
+		end;
+		args = function()
+			local args_string = vim.fn.input('Arguments: ')
+			-- return vim.split(args_string, " +")
+			return splitArgs(args_string)
+		end
+	}
 }
 
+-- TODO 支持远程文件同步
+dap.adapters.delve = function(cb, config)
+	local host = vim.fn.input('host:')
+	local port = vim.fn.input('port:')
+	cb({
+		type = 'server',
+		host = host,
+		port = port,
+	})
+end
 
 --
 -- dap.configurations.go = {
@@ -708,9 +728,6 @@ require('gitsigns').setup({
 		map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
 	end
 })
-
--- vgit 输入模式乱跳
--- require('vgit').setup()
 
 -- undotree
 keymap("n", "<leader>hh", "<cmd>UndotreeToggle<cr>")
