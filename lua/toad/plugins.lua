@@ -1,21 +1,10 @@
 require('packer').startup(function()
 	use 'wbthomason/packer.nvim'
-	use "navarasu/onedark.nvim"
 	use "morhetz/gruvbox"
-	use { 'kevinhwang91/nvim-bqf' }
-	use {
-		'kyazdani42/nvim-tree.lua',
-		requires = {
-			'kyazdani42/nvim-web-devicons', -- optional, for file icons
-		},
-		tag = 'nightly' -- optional, updated every week. (see issue #1193)
-	}
-	use "windwp/nvim-autopairs"
-	use 'preservim/tagbar'
+
 
 	use 'fatih/vim-go'
 
-	use 'neovim/nvim-lspconfig'
 	use 'hrsh7th/cmp-nvim-lsp'
 	use 'hrsh7th/cmp-buffer'
 	use 'hrsh7th/cmp-path'
@@ -28,8 +17,6 @@ require('packer').startup(function()
 		config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end, }
 	use { 'michaelb/sniprun', run = 'bash ./install.sh' }
 
-	use 'voldikss/vim-floaterm'
-
 	use {
 		"nvim-neotest/neotest",
 		requires = {
@@ -38,11 +25,6 @@ require('packer').startup(function()
 		}
 	}
 	use { "rcarriga/vim-ultest", requires = { "vim-test/vim-test" }, run = ":UpdateRemotePlugins" }
-	-- lualine
-	use {
-		'nvim-lualine/lualine.nvim',
-		requires = { 'kyazdani42/nvim-web-devicons', opt = true }
-	}
 
 	use {
 		'nvim-treesitter/nvim-treesitter',
@@ -67,9 +49,6 @@ require('packer').startup(function()
 	-- markdown
 	use 'iamcco/markdown-preview.nvim'
 
-	use 'numToStr/Comment.nvim'
-
-	use 'voldikss/vim-translator'
 
 	-- search
 	use {
@@ -82,133 +61,23 @@ require('packer').startup(function()
 	vim.opt.completeopt = { "menu", "menuone", "noselect" }
 end)
 
---- custom keymap
+-- load plugin
+require("tree.tree")
+require("base.keymap")
+require("small.group")
 
-local function cmd(cmdStr)
-	vim.api.nvim_command(cmdStr)
-end
-
-local function setVimCommand(cmds)
-	for _, c in pairs(cmds) do
-		cmd(c)
-	end
-end
-
-setVimCommand({
-	'set number',
-	'set ignorecase',
-	'set encoding=UTF-8',
-	-- 'set number',
-	--set lines=60
-	--set columns=200
-	'set mouse=a',
-	'syntax on',
-	'set cursorline',
-	'set laststatus=2',
-	--set autoindent',
-	'set tabstop=4',
-	'set smarttab',
-	'set shiftwidth=4',
-	'set softtabstop=4',
-	'set backspace=eol,start,indent',
-
-	'set showcmd',
-	'set whichwrap+=<,>,h,l',
-	'set scrolloff=3',
-	'set history=1000',
-	'set nobackup',
-	'set nocompatible',
-	-- set verbosefile=./vim.log',
-	'set cmdheight=2',
-	-- 'set completeopt-=preview',
-	'set completeopt=menu,menuone,noselect',
-	'set signcolumn=yes',
-	'set autowriteall',
-
-	':autocmd InsertEnter * set cul',
-	':autocmd InsertLeave * set nocul'
-
-})
-
-local function split(str, reps)
-	local resultStrList = {}
-	_ = string.gsub(str, '[^' .. reps .. ']+', function(w)
-		table.insert(resultStrList, w)
-	end)
-	return resultStrList
-end
-
-local function keymap(model, key, val)
-	vim.keymap.set(model, key, val)
-end
-
-local function setVimKeyMap(keyMap)
-	for _, val in pairs(keyMap) do
-		local args = split(val, " ")
-		local model = string.sub(args[1], 1, 1)
-
-		if (model == 'm') then
-			model = ''
-		end
-
-		keymap(model, args[2], args[3])
-	end
-end
-
-setVimKeyMap({
-	'nnoremap m :+10<cr>',
-	'nnoremap , :-10<cr>',
-	'vnoremap m 10<cr>',
-	'vnoremap , 10-',
-	'imap <c-k> <up>',
-	'imap <c-h> <left>',
-	'imap <c-j> <down>',
-	'imap <c-l> <right>',
-	'imap <c-a> <esc>I',
-	'nmap <c-a> ^',
-	'vnoremap <c-a> ^',
-	'inoremap <c-e> <esc>A',
-	'nnoremap <c-e> $',
-	'vnoremap <c-e> $',
-	'imap <c-g> <esc>GG',
-	'imap <c-o> <esc>o',
-	'imap <c-u> <esc>u',
-	'imap <c-d> <esc>ddi',
-	'nmap <c-k> <up>',
-	'nmap <c-h> <left>',
-	'nmap <c-j> <down>',
-	'nmap <c-l> <right>',
-	'inoremap <c-t> <esc>yyi',
-	'nnoremap <c-t> <c-o>',
-	'imap <c-p> <esc>pi',
-	'nnoremap <c-G> GG',
-	'imap <c-G> <esc>GG',
-	'imap <c-s> <esc>:w<cr>',
-	'nmap <c-s> :w<cr>',
-	'nmap <c-q> :wqa<cr>',
-	'imap <c-q> :wqa<cr>',
-	'nmap L $',
-	'nmap H ^',
-	-- 'noremap <c-w> <c-w>w',
-	'vmap <leader>y "+y',
-	'vnoremap <c-d> "+d',
-	'nmap <leader>v "+p',
-	'noremap <c-x> <c-r>',
-	'map <C-n> :cnext<CR>',
-	'map <C-m> :cprevious<CR>',
-})
+local util = require("base.util")
 
 -- vim-go
-keymap('', "<F1>", ":GoDocBrowser<CR>")
-keymap('n', "<leader><space>i", ":GoImpl ")
-keymap('n', "<leader>fill", ":GoFillStruct<CR>")
-keymap('n', "<leader>f", ":GoReferrers<CR>")
-keymap('n', "<leader>c", ":GoCallees<CR>")
-keymap('n', "<leader>tg", ":GoAddTags<CR>")
+util.keymap('', "<F1>", ":GoDocBrowser<CR>")
+util.keymap('n', "<leader><space>i", ":GoImpl ")
+util.keymap('n', "<leader>fill", ":GoFillStruct<CR>")
+util.keymap('n', "<leader>f", ":GoReferrers<CR>")
+util.keymap('n', "<leader>c", ":GoCallees<CR>")
+util.keymap('n', "<leader>tg", ":GoAddTags<CR>")
 
 -- nvim-cmp
 require("cmp_nvim_ultisnips").setup {}
-
 
 local cmp = require('cmp')
 local cmp_ultisnips_mappings = require("cmp_nvim_ultisnips.mappings")
@@ -265,7 +134,7 @@ local on_attach = function(_, bufnr)
 end
 
 -- close quickfix
-keymap("", "<leader>a", ":cclose<CR>")
+util.keymap("", "<leader>a", ":cclose<CR>")
 
 -- Setup lspconfig.
 local nvim_lsp = require('lspconfig')
@@ -306,7 +175,7 @@ function Go_org_imports(wait_ms)
 	end
 end
 
-cmd("autocmd BufWritePre *.go lua Go_org_imports()")
+util.cmd("autocmd BufWritePre *.go lua Go_org_imports()")
 --
 -- lua
 nvim_lsp['sumneko_lua'].setup {
@@ -384,49 +253,6 @@ cmp.setup.cmdline(':', {
 	})
 })
 
--- nvim-tree
-local tree_cb = require 'nvim-tree.config'.nvim_tree_callback
-keymap("", "<F2>", "<cmd> NvimTreeToggle<cr>")
-keymap("", "<leader>af", "<cmd> NvimTreeFindFile<cr>")
-
-local function print_node_path(node)
-	print(node.absolute_path)
-end
-
-require("nvim-tree").setup({
-	sort_by = "case_sensitive",
-	view = {
-		adaptive_size = true,
-		mappings = {
-			list = {
-				{ key = "u", action = "dir_up" },
-				{ key = "s", cb = tree_cb("split") },
-				{ key = "p", action = "print_path", action_cb = print_node_path },
-				{ key = "m", action = "" }
-			},
-		},
-	},
-	renderer = {
-		group_empty = false,
-		icons = {
-			glyphs = {
-				folder = {
-					arrow_closed = " ",
-					arrow_open = " ",
-				},
-			},
-		},
-	},
-	git = {
-		enable = true,
-		ignore = false,
-		show_on_dirs = true,
-		timeout = 400,
-	},
-	filters = {
-		dotfiles = true,
-	},
-})
 
 local dap = require('dap')
 function closeDebug()
@@ -435,17 +261,17 @@ function closeDebug()
 	require 'nvim-dap-virtual-text'.disable()
 end
 
-keymap("n", "<leader>db", "<cmd>lua require'dap'.toggle_breakpoint()<CR>")
-keymap("n", "<leader>dt", "<cmd>lua require'dap'.terminate()<CR>")
-keymap("n", "<leader>ds", "<cmd>lua closeDebug()<CR>")
-keymap("n", "<leader>dc", "<cmd>lua require'dap'.continue()<CR>")
-keymap("n", "<leader>dlb", "<cmd>lua require'dap'.list_breakpoints()<CR>")
-keymap("n", "<leader>dcb", "<cmd>lua require'dap'.clear_breakpoints()<CR>")
-keymap("n", "<F5>", "<cmd>lua require'dap'.step_over()<CR>")
-keymap("n", "<F6>", "<cmd>lua require'dap'.step_into()<CR>")
-keymap("n", "<F7>", "<cmd>lua require'dap'.step_out()<CR>")
-keymap("n", "<leader>dg", "<cmd>lua require'dap'.run_to_cursor()<CR>")
-keymap("n", "<leader>re", "<cmd>lua require'dap'.repl.toggle()<CR>")
+util.keymap("n", "<leader>db", "<cmd>lua require'dap'.toggle_breakpoint()<CR>")
+util.keymap("n", "<leader>dt", "<cmd>lua require'dap'.terminate()<CR>")
+util.keymap("n", "<leader>ds", "<cmd>lua closeDebug()<CR>")
+util.keymap("n", "<leader>dc", "<cmd>lua require'dap'.continue()<CR>")
+util.keymap("n", "<leader>dlb", "<cmd>lua require'dap'.list_breakpoints()<CR>")
+util.keymap("n", "<leader>dcb", "<cmd>lua require'dap'.clear_breakpoints()<CR>")
+util.keymap("n", "<F5>", "<cmd>lua require'dap'.step_over()<CR>")
+util.keymap("n", "<F6>", "<cmd>lua require'dap'.step_into()<CR>")
+util.keymap("n", "<F7>", "<cmd>lua require'dap'.step_out()<CR>")
+util.keymap("n", "<leader>dg", "<cmd>lua require'dap'.run_to_cursor()<CR>")
+util.keymap("n", "<leader>re", "<cmd>lua require'dap'.repl.toggle()<CR>")
 
 dap.adapters.go = {
 	type = 'server',
@@ -630,7 +456,7 @@ require("nvim-dap-virtual-text").setup({
 
 -- dap-ui
 
-keymap('n', "<leader>k", "<cmd>lua require'dapui'.eval()<CR>")
+util.keymap('n', "<leader>k", "<cmd>lua require'dapui'.eval()<CR>")
 
 local dapui = require("dapui")
 dap.listeners.after.event_initialized["dapui_config"] = function()
@@ -660,8 +486,6 @@ dapui.setup()
 
 --
 
--- tagbar
-keymap('', "<F3>", "<cmd> TagbarToggle<CR>")
 --
 -- nvim-treesitter
 require 'nvim-treesitter.configs'.setup {
@@ -730,7 +554,7 @@ require('gitsigns').setup({
 })
 
 -- undotree
-keymap("n", "<leader>hh", "<cmd>UndotreeToggle<cr>")
+util.keymap("n", "<leader>hh", "<cmd>UndotreeToggle<cr>")
 vim.cmd(
 	[[
 func SetUndodir()
@@ -757,35 +581,6 @@ call SetUndodir()
 
 -- nmap <M-s> <Plug>MarkdownPreviewStop
 -- nmap <C-p> <Plug>MarkdownPreviewToggle
--- Comment
-require('Comment').setup({
-	toggler = {
-		---Line-comment toggle keymap
-		line = '<leader>/',
-		---Block-comment toggle keymap
-		block = '<leader>.',
-	}, opleader = {
-		---Line-comment keymap
-		line = '<leader>/',
-		---Block-comment keymap
-		block = '<leader>.',
-	},
-})
--- nvim-autopairs
-require("nvim-autopairs").setup({
-	disable_filetype = { "TelescopePrompt" },
-})
-
-local cmp_autopairs = require('nvim-autopairs.completion.cmp')
-cmp.event:on(
-	'confirm_done',
-	cmp_autopairs.on_confirm_done()
-)
-
--- vim-translator
-keymap("n", "<leader>t", "<Plug>TranslateW")
-keymap("v", "<leader>t", "<Plug>TranslateWV")
-
 -- telescope
 --
 local telescope = require('telescope')
@@ -803,21 +598,18 @@ telescope.setup {
 
 telescope.load_extension('fzf')
 
-keymap('n', '<leader>ff', '<cmd>Telescope find_files<CR>')
-keymap('n', '<leader>fg', '<cmd>Telescope live_grep<CR>')
-keymap('n', '<leader>fb', '<cmd>Telescope buffer<CR>')
-keymap('n', '<leader>fh', '<cmd>Telescope help_tags<CR>')
-keymap('n', '<leader>fz', '<cmd>Telescope grep_string search= <CR>')
+util.keymap('n', '<leader>ff', '<cmd>Telescope find_files<CR>')
+util.keymap('n', '<leader>fg', '<cmd>Telescope live_grep<CR>')
+util.keymap('n', '<leader>fb', '<cmd>Telescope buffer<CR>')
+util.keymap('n', '<leader>fh', '<cmd>Telescope help_tags<CR>')
+util.keymap('n', '<leader>fz', '<cmd>Telescope grep_string search= <CR>')
 -- nnoremap <leader>fb <cmd>Telescope buffers<cr>
 -- nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 
--- -- nvim-bqf
-require('bqf').setup()
---
 -- nvim-test
-keymap("n", "<leader>tr", "<cmd>UltestSummary<cr>")
-keymap("n", "<leader>td", "<cmd>UltestDebug<cr>")
-cmd("let g:ultest_deprecation_notice = 0")
+util.keymap("n", "<leader>tr", "<cmd>UltestSummary<cr>")
+util.keymap("n", "<leader>td", "<cmd>UltestDebug<cr>")
+util.cmd("let g:ultest_deprecation_notice = 0")
 
 local ultest = require 'ultest'
 
@@ -851,7 +643,7 @@ ultest.setup({
 })
 
 -- sniprun
-keymap("", "<leader>rr", "<cmd>SnipRun<CR>")
+util.keymap("", "<leader>rr", "<cmd>SnipRun<CR>")
 require 'sniprun'.setup({
 	selected_interpreters = {}, --# use those instead of the default for the current filetype
 	repl_enable = {}, --# enable REPL-like behavior for the given interpreters
@@ -915,67 +707,8 @@ require 'sniprun'.setup({
 })
 
 -- ultisnips
-cmd('let g:UltiSnipsExpandTrigger="<CR>"')
-cmd('let g:UltiSnipsJumpForwardTrigger="<c-b>"')
-cmd('let g:UltiSnipsJumpBackwardTrigger="<c-z>"')
-
--- onedark
-require('onedark').setup {
-	style = 'cool'
-}
-require('onedark').load()
-
--- lualine
-require('lualine').setup {
-	options = {
-		theme = 'onedark'
-	}
-}
-
--- floaterm
--- map <leader>n <esc>:FloatermNew lf<CR>
--- map <leader>ftr :FloatermNew --height=0.3 --wintype=split --position=right <CR>
---
-setVimCommand({
-	"let g:floaterm_keymap_kill ='<F8>'",
-	"let g:floaterm_keymap_new ='<leader>ft'",
-	"let g:floaterm_keymap_prev ='<F9>'",
-	"let g:floaterm_keymap_next ='<F10>'",
-	"let g:floaterm_keymap_toggle ='<F12>'"
-})
-
--- jsonnet
-require 'lspconfig'.jsonnet_ls.setup {
-	ext_vars = {
-		foo = 'bar',
-	},
-	formatting = {
-		-- default values
-		Indent              = 2,
-		MaxBlankLines       = 2,
-		StringStyle         = 'single',
-		CommentStyle        = 'slash',
-		PrettyFieldNames    = true,
-		PadArrays           = false,
-		PadObjects          = true,
-		SortImports         = true,
-		UseImplicitPlus     = true,
-		StripEverything     = false,
-		StripComments       = false,
-		StripAllButComments = false,
-	},
-}
-
--- josn
---Enable (broadcasting) snippet capability for completion
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
-
-require 'lspconfig'.jsonls.setup {
-	capabilities = capabilities,
-}
-
--- clang
-require 'lspconfig'.clangd.setup {}
+util.cmd('let g:UltiSnipsExpandTrigger="<CR>"')
+util.cmd('let g:UltiSnipsJumpForwardTrigger="<c-b>"')
+util.cmd('let g:UltiSnipsJumpBackwardTrigger="<c-z>"')
 
 return
