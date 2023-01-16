@@ -1,1 +1,1 @@
-require 'toad.plugins'
+require 'plugins'
