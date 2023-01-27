@@ -69,6 +69,31 @@ dap.configurations.go = {
 	},
 	{
 		type = 'delve';
+		name = 'remote-default';
+		request = 'launch';
+		mode = "debug";
+		showLog = true;
+		program = function()
+			return vim.fn.input('Program: ')
+		end;
+		outputModel = 'remote';
+		substitutePath = {
+			{
+				from = "/Users/toad/work";
+				to = "/root";
+			}
+		},
+
+		noDebug = true;
+		args = function()
+			local args_string = vim.fn.input('arguments: ')
+			-- return vim.split(args_string, " +")
+			return util.splitargs(args_string)
+		end
+	},
+
+	{
+		type = 'delve';
 		name = 'remote';
 		request = 'launch';
 		mode = "debug";
@@ -76,6 +101,18 @@ dap.configurations.go = {
 		program = function()
 			return vim.fn.input('Program: ')
 		end;
+		outputModel = 'remote';
+		substitutePath = {
+			function()
+				local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
+				return {
+					from = from_to[1];
+					to = from_to[2];
+				}
+			end;
+		},
+
+		noDebug = true;
 		args = function()
 			local args_string = vim.fn.input('Arguments: ')
 			-- return vim.split(args_string, " +")
@@ -84,9 +121,9 @@ dap.configurations.go = {
 	}
 }
 
--- BUG: delve未支持 console 的 stdout,stderr 输出下发
--- https://github.com/go-delve/delve/pull/3108 
--- TODO 考虑协助社区完成?
+
+-- BUG: Get console output is not supported.
+-- https://github.com/go-delve/delve/pull/3253
 dap.adapters.delve = function(cb, config)
 	local host = vim.fn.input('host:')
 	local port = vim.fn.input('port:')
@@ -94,10 +131,9 @@ dap.adapters.delve = function(cb, config)
 		host = "0.0.0.0"
 	end
 
-	if (port=="") then
-		port="38697"
+	if (port == "") then
+		port = "38697"
 	end
-
 	cb({
 		type = 'server',
 		host = host,
@@ -126,10 +162,16 @@ packer.use({ "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } })
 util.keymap('n', "<leader>k", "<cmd>lua require'dapui'.eval()<CR>")
 
 local dapui = require("dapui")
-dap.listeners.after.event_initialized["dapui_config"] = function()
+
+dap.listeners.before.initialize["dapui_config"] = function()
 	dapui.open({ reset = true })
 	util.cmd("DapVirtualTextEnable")
 end
+
+dap.listeners.after.event_initialized["dapui_config"] = function()
+
+end
+
 dap.listeners.after.event_terminated["dapui_config"] = function()
 	-- dapui.close({})
 	util.cmd("DapVirtualTextDisable")

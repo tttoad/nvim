@@ -35,7 +35,7 @@ function _M.setVimCommand(cmds)
 	end
 end
 
- function _M.splitArgs(args)
+function _M.splitArgs(args)
 	local nextIndex = 0
 	local result = {}
 
@@ -84,5 +84,8 @@ end
 	return result
 end
 
+function _M.test()
+	print("test")
+end
 
 return _M
