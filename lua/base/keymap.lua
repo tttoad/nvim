@@ -78,3 +78,7 @@ util.setVimCommand({
 	':autocmd InsertLeave * set nocul'
 
 })
+
+util.keymap("n", "<leader>bm", ":let $GOFLAGS=\"-tags=darwin\"<CR> :LspRestart<CR>")
+util.keymap("n", "<leader>bw", ":let $GOFLAGS=\"-tags=windows\"<CR> :LspRestart<CR>")
+util.keymap("n", "<leader>bl", ":let $GOFLAGS=\"-tags=linux\"<CR> :LspRestart<CR>")
