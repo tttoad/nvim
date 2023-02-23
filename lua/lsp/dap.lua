@@ -83,7 +83,6 @@ dap.configurations.go = {
 				to = "/root";
 			}
 		},
-		dlvCwd = "/root/phantom-steps/";
 		args = function()
 			local args_string = vim.fn.input('arguments: ')
 			-- return vim.split(args_string, " +")
@@ -122,7 +121,7 @@ dap.configurations.go = {
 		mode = "debug";
 		showLog = true;
 		program = "${file}";
-		outputMode = 'remote';
+		outputMode = 'only-remote';
 	}
 }
 
@@ -178,11 +177,11 @@ dap.listeners.after.event_initialized["dapui_config"] = function()
 end
 
 dap.listeners.after.event_terminated["dapui_config"] = function()
-	-- dapui.close({})
 	util.cmd("DapVirtualTextDisable")
 end
 dap.listeners.after.event_exited["dapui_config"] = function()
-	-- dapui.close({})
+	dapui.close({})
+	util.cmd("NvimTreeRefresh")
 	util.cmd("DapVirtualTextDisable")
 end
 

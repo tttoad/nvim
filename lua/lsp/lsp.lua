@@ -119,7 +119,7 @@ end
 util.cmd("autocmd BufWritePre *.go lua Go_org_imports()")
 --
 -- lua
-nvim_lsp['sumneko_lua'].setup {
+nvim_lsp['lua_ls'].setup {
 	settings = {
 		Lua = {
 			runtime = {
@@ -142,6 +142,42 @@ nvim_lsp['sumneko_lua'].setup {
 		},
 	},
 }
+
+-- jsonnet
+packer.use 'neovim/nvim-lspconfig'
+require 'lspconfig'.jsonnet_ls.setup {
+	ext_vars = {
+		foo = 'bar',
+	},
+	formatting = {
+		-- default values
+		Indent              = 2,
+		MaxBlankLines       = 2,
+		StringStyle         = 'single',
+		CommentStyle        = 'slash',
+		PrettyFieldNames    = true,
+		PadArrays           = false,
+		PadObjects          = true,
+		SortImports         = true,
+		UseImplicitPlus     = true,
+		StripEverything     = false,
+		StripComments       = false,
+		StripAllButComments = false,
+	},
+}
+
+-- josn
+--Enable (broadcasting) snippet capability for completion
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+
+require 'lspconfig'.jsonls.setup {
+	capabilities = capabilities,
+}
+
+-- clang
+require 'lspconfig'.clangd.setup {}
+
 
 -- lsp-config
 
