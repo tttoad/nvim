@@ -1,8 +1,8 @@
 local util = require("base.util")
 local packer = require('packer')
 
-packer.use 'ravenxrz/DAPInstall.nvim'
-packer.use 'mfussenegger/nvim-dap'
+packer.use('ravenxrz/DAPInstall.nvim')
+packer.use('mfussenegger/nvim-dap')
 
 local dap = require('dap')
 function CloseDebug()
@@ -22,6 +22,7 @@ util.keymap("n", "<F6>", "<cmd>lua require'dap'.step_into()<CR>")
 util.keymap("n", "<F7>", "<cmd>lua require'dap'.step_out()<CR>")
 util.keymap("n", "<leader>dg", "<cmd>lua require'dap'.run_to_cursor()<CR>")
 util.keymap("n", "<leader>re", "<cmd>lua require'dap'.repl.toggle()<CR>")
+util.keymap("n", "<leader>du", "<cmd>lua require'dapui'.open({reset=true})")
 
 dap.adapters.go = {
 	type = 'server',
@@ -72,23 +73,20 @@ dap.configurations.go = {
 		name = 'remote-default';
 		request = 'launch';
 		mode = "debug";
-		showLog = true;
 		program = function()
 			return vim.fn.input('Program: ')
 		end;
-		outputModel = 'remote';
+		outputMode = 'remote';
 		substitutePath = {
 			{
 				from = "/Users/toad/work";
 				to = "/root";
 			}
 		},
-
-		noDebug = true;
 		args = function()
 			local args_string = vim.fn.input('arguments: ')
 			-- return vim.split(args_string, " +")
-			return util.splitargs(args_string)
+			return util.splitArgs(args_string)
 		end
 	},
 
@@ -97,11 +95,10 @@ dap.configurations.go = {
 		name = 'remote';
 		request = 'launch';
 		mode = "debug";
-		showLog = true;
 		program = function()
 			return vim.fn.input('Program: ')
 		end;
-		outputModel = 'remote';
+		outputMode = 'remote';
 		substitutePath = {
 			function()
 				local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
@@ -111,13 +108,20 @@ dap.configurations.go = {
 				}
 			end;
 		},
-
-		noDebug = true;
 		args = function()
 			local args_string = vim.fn.input('Arguments: ')
 			-- return vim.split(args_string, " +")
 			return util.splitArgs(args_string)
 		end
+	},
+	{
+		type = 'delve';
+		name = 'remote-test';
+		request = 'launch';
+		mode = "debug";
+		showLog = true;
+		program = "${file}";
+		outputMode = 'only-remote';
 	}
 }
 
@@ -158,7 +162,6 @@ require("nvim-dap-virtual-text").setup({
 
 -- dap-ui
 packer.use({ "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } })
-
 util.keymap('n', "<leader>k", "<cmd>lua require'dapui'.eval()<CR>")
 
 local dapui = require("dapui")
@@ -173,12 +176,13 @@ dap.listeners.after.event_initialized["dapui_config"] = function()
 end
 
 dap.listeners.after.event_terminated["dapui_config"] = function()
-	-- dapui.close({})
 	util.cmd("DapVirtualTextDisable")
 end
 dap.listeners.after.event_exited["dapui_config"] = function()
-	-- dapui.close({})
+	dapui.close({})
+	util.cmd("NvimTreeRefresh")
 	util.cmd("DapVirtualTextDisable")
 end
 
 dapui.setup()
+

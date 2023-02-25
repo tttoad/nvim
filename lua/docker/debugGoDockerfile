@@ -13,4 +13,3 @@ RUN go env -w GOPROXY="https://goproxy.cn,direct"
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 CMD ["dlv","dap","-l","0.0.0.0:38697","--log","--log-output=dap"]
-

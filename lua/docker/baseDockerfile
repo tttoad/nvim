@@ -1,6 +1,6 @@
-FROM ubuntu:18.04
+ROM ubuntu:18.04
 
 RUN sed -i s@/ports.ubuntu.com@/mirrors.aliyun.com@g /etc/apt/sources.list
 RUN apt update
 RUN apt upgrade -y
-RUN apt install -y ca-certificates
+RUN apt install -y ca-certificates make git net-tools gcc

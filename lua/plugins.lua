@@ -1,4 +1,5 @@
 require('packer').startup(function()
+
 	use 'wbthomason/packer.nvim'
 	use "morhetz/gruvbox"
 
@@ -22,8 +23,6 @@ require('packer').startup(function()
 		'nvim-treesitter/nvim-treesitter',
 		run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
 	}
-	-- debug
-	
 
 	use {
 		'lewis6991/gitsigns.nvim',
@@ -36,7 +35,6 @@ require('packer').startup(function()
 
 	-- markdown
 	use 'iamcco/markdown-preview.nvim'
-
 
 	-- search
 	use {

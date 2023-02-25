@@ -1,6 +1,6 @@
 .PHONY: buildBaseImage
 buildBaseImage: 
-	docker build -f ./docker/baseDockerfile -t base/image:latest . 
+	docker build --network=host --no-cache -f ./docker/baseDockerfile -t base/image:latest . 
 
 .PHONY: buildDebugGoImage
 buildDebugGoImage:

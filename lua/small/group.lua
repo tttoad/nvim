@@ -34,41 +34,6 @@ util.setVimCommand({
 	"let g:floaterm_keymap_toggle ='<F12>'"
 })
 
--- jsonnet
-packer.use 'neovim/nvim-lspconfig'
-require 'lspconfig'.jsonnet_ls.setup {
-	ext_vars = {
-		foo = 'bar',
-	},
-	formatting = {
-		-- default values
-		Indent              = 2,
-		MaxBlankLines       = 2,
-		StringStyle         = 'single',
-		CommentStyle        = 'slash',
-		PrettyFieldNames    = true,
-		PadArrays           = false,
-		PadObjects          = true,
-		SortImports         = true,
-		UseImplicitPlus     = true,
-		StripEverything     = false,
-		StripComments       = false,
-		StripAllButComments = false,
-	},
-}
-
--- josn
---Enable (broadcasting) snippet capability for completion
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
-
-require 'lspconfig'.jsonls.setup {
-	capabilities = capabilities,
-}
-
--- clang
-require 'lspconfig'.clangd.setup {}
-
 -- nvim-autopairs
 packer.use("windwp/nvim-autopairs")
 require("nvim-autopairs").setup({
@@ -89,7 +54,7 @@ util.keymap("n", "<leader>t", "<Plug>TranslateW")
 util.keymap("v", "<leader>t", "<Plug>TranslateWV")
 
 -- Comment
-packer.use 'numToStr/Comment.nvim'
+packer.use('numToStr/Comment.nvim')
 require('Comment').setup({
 	toggler = {
 		---Line-comment toggle keymap
