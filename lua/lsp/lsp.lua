@@ -1,22 +1,20 @@
-local packer = require("packer")
 local util = require("base.util")
 -- vim-go
-packer.use 'fatih/vim-go'
-util.keymap('', "<F1>", ":GoDocBrowser<CR>")
-util.keymap('n', "<leader><space>i", ":GoImpl ")
-util.keymap('n', "<leader>fill", ":GoFillStruct<CR>")
-util.keymap('n', "<leader>f", ":GoReferrers<CR>")
-util.keymap('n', "<leader>c", ":GoCallees<CR>")
-util.keymap('n', "<leader>tg", ":GoAddTags<CR>")
-
-
--- lsp
-packer.use 'hrsh7th/cmp-nvim-lsp'
-packer.use 'hrsh7th/cmp-buffer'
-packer.use 'hrsh7th/cmp-path'
-packer.use 'hrsh7th/cmp-cmdline'
-packer.use 'hrsh7th/nvim-cmp'
-
+-- packer.use 'fatih/vim-go'
+-- util.keymap('', "<F1>", ":GoDocBrowser<CR>")
+-- util.keymap('n', "<leader><space>i", ":GoImpl ")
+-- util.keymap('n', "<leader>fill", ":GoFillStruct<CR>")
+-- util.keymap('n', "<leader>f", ":GoReferrers<CR>")
+-- util.keymap('n', "<leader>c", ":GoCallees<CR>")
+-- util.keymap('n', "<leader>tg", ":GoAddTags<CR>")
+--
+local packer=require('packer')
+packer.use( 'hrsh7th/cmp-nvim-lsp')
+	 packer.use('hrsh7th/cmp-buffer')
+	 packer.use('hrsh7th/cmp-path')
+	 packer.use('hrsh7th/cmp-cmdline')
+	 packer.use('hrsh7th/nvim-cmp')
+--lsp
 require("cmp_nvim_ultisnips").setup {}
 
 local cmp = require('cmp')
@@ -48,7 +46,7 @@ cmp.setup({
 			cmp_ultisnips_mappings.jump_backwards(fallback)
 		end, { "i", "s" }),
 	},
-
+--
 	sources = cmp.config.sources({
 		{ name = 'nvim_lsp' },
 		{ name = 'ultisnips' },
@@ -61,25 +59,25 @@ cmp.setup({
 		documentation = cmp.config.window.bordered(),
 	}
 })
-
+--
 -- nvim-cmp
 -- local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities()) --nvim-cmp
 -- capabilities.textDocument.completion.completionItem.snippetSupport = true
-
+--
 local on_attach = function(_, bufnr)
 	-- local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-
+--
 	local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-
+--
 	buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 end
-
+--
 -- close quickfix
 util.keymap("", "<leader>a", ":cclose<CR>")
-
+--
 -- Setup lspconfig.
 local nvim_lsp = require('lspconfig')
-
+--
 -- setup languages
 -- GoLang
 nvim_lsp['gopls'].setup {
@@ -100,7 +98,7 @@ nvim_lsp['gopls'].setup {
 		usePlaceholders = true,
 	}
 }
-
+--
 -- order imports
 function Go_org_imports(wait_ms)
 	local params = vim.lsp.util.make_range_params()
@@ -115,7 +113,7 @@ function Go_org_imports(wait_ms)
 		end
 	end
 end
-
+--
 util.cmd("autocmd BufWritePre *.go lua Go_org_imports()")
 --
 -- lua
@@ -142,9 +140,9 @@ nvim_lsp['lua_ls'].setup {
 		},
 	},
 }
-
+--
 -- jsonnet
-packer.use 'neovim/nvim-lspconfig'
+packer.use('neovim/nvim-lspconfig')
 require 'lspconfig'.jsonnet_ls.setup {
 	ext_vars = {
 		foo = 'bar',
@@ -165,22 +163,22 @@ require 'lspconfig'.jsonnet_ls.setup {
 		StripAllButComments = false,
 	},
 }
-
+--
 -- josn
 --Enable (broadcasting) snippet capability for completion
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
-
+--
 require 'lspconfig'.jsonls.setup {
 	capabilities = capabilities,
 }
-
+--
 -- clang
 require 'lspconfig'.clangd.setup {}
-
-
+--
+--
 -- lsp-config
-
+--
 local bufopts = { noremap = true, silent = true, buffer = bufnr }
 local opts = { noremap = true, silent = true }
 -- vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
@@ -202,7 +200,7 @@ vim.keymap.set('', '<leader>rn', vim.lsp.buf.rename, bufopts)
 vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
 vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
 vim.keymap.set('', '<C-R>', vim.lsp.buf.formatting, bufopts)
-
+--
 -- Set configuration for specific filetype.
 cmp.setup.filetype('gitcommit', {
 	sources = cmp.config.sources({
@@ -211,7 +209,7 @@ cmp.setup.filetype('gitcommit', {
 		{ name = 'buffer' },
 	})
 })
-
+--
 -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline('/', {
 	mapping = cmp.mapping.preset.cmdline(),
@@ -219,7 +217,7 @@ cmp.setup.cmdline('/', {
 		{ name = 'buffer' }
 	}
 })
-
+--
 -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline(':', {
 	mapping = cmp.mapping.preset.cmdline(),

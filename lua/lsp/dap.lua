@@ -1,8 +1,8 @@
 local util = require("base.util")
 local packer = require('packer')
 
-packer.use 'ravenxrz/DAPInstall.nvim'
-packer.use 'mfussenegger/nvim-dap'
+packer.use('ravenxrz/DAPInstall.nvim')
+packer.use('mfussenegger/nvim-dap')
 
 local dap = require('dap')
 function CloseDebug()
@@ -162,7 +162,6 @@ require("nvim-dap-virtual-text").setup({
 
 -- dap-ui
 packer.use({ "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } })
-
 util.keymap('n', "<leader>k", "<cmd>lua require'dapui'.eval()<CR>")
 
 local dapui = require("dapui")
@@ -186,3 +185,4 @@ dap.listeners.after.event_exited["dapui_config"] = function()
 end
 
 dapui.setup()
+

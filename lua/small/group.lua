@@ -54,7 +54,7 @@ util.keymap("n", "<leader>t", "<Plug>TranslateW")
 util.keymap("v", "<leader>t", "<Plug>TranslateWV")
 
 -- Comment
-packer.use 'numToStr/Comment.nvim'
+packer.use('numToStr/Comment.nvim')
 require('Comment').setup({
 	toggler = {
 		---Line-comment toggle keymap
