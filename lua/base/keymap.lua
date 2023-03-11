@@ -51,7 +51,7 @@ util.setVimCommand({
 	--set lines=60
 	--set columns=200
 	'set mouse=a',
-	'syntax on',
+	-- 'syntax on',
 	'set cursorline',
 	'set laststatus=2',
 	--set autoindent',
@@ -75,8 +75,7 @@ util.setVimCommand({
 	'set autowriteall',
 
 	':autocmd InsertEnter * set cul',
-	':autocmd InsertLeave * set nocul'
-
+	':autocmd InsertLeave * set nocul',
 })
 
 util.keymap("n", "<leader>bm", ":let $GOFLAGS=\"-tags=darwin\" <CR> :let $GOOS=\"darwin\" <CR> :LspRestart<CR>")

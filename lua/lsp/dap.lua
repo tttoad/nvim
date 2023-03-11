@@ -121,7 +121,7 @@ dap.configurations.go = {
 		mode = "debug";
 		showLog = true;
 		program = "${file}";
-		outputMode = 'only-remote';
+		outputMode = 'remote';
 	}
 }
 

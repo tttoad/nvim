@@ -1,19 +1,22 @@
 local util = require("base.util")
+local packer = require('packer')
+
 -- vim-go
--- packer.use 'fatih/vim-go'
--- util.keymap('', "<F1>", ":GoDocBrowser<CR>")
--- util.keymap('n', "<leader><space>i", ":GoImpl ")
--- util.keymap('n', "<leader>fill", ":GoFillStruct<CR>")
--- util.keymap('n', "<leader>f", ":GoReferrers<CR>")
--- util.keymap('n', "<leader>c", ":GoCallees<CR>")
--- util.keymap('n', "<leader>tg", ":GoAddTags<CR>")
---
-local packer=require('packer')
-packer.use( 'hrsh7th/cmp-nvim-lsp')
-	 packer.use('hrsh7th/cmp-buffer')
-	 packer.use('hrsh7th/cmp-path')
-	 packer.use('hrsh7th/cmp-cmdline')
-	 packer.use('hrsh7th/nvim-cmp')
+packer.use('fatih/vim-go')
+util.keymap('', "<F1>", ":GoDocBrowser<CR>")
+util.keymap('n', "<leader><space>i", ":GoImpl ")
+util.keymap('n', "<leader>fill", ":GoFillStruct<CR>")
+util.keymap('n', "<leader>f", ":GoReferrers<CR>")
+util.keymap('n', "<leader>c", ":GoCallees<CR>")
+util.keymap('n', "<leader>tg", ":GoAddTags<CR>")
+vim.g.go_def_mapping_enabled = 0
+
+packer.use('hrsh7th/cmp-nvim-lsp')
+packer.use('hrsh7th/cmp-buffer')
+packer.use('hrsh7th/cmp-path')
+packer.use('hrsh7th/cmp-cmdline')
+packer.use('hrsh7th/nvim-cmp')
+
 --lsp
 require("cmp_nvim_ultisnips").setup {}
 
@@ -46,7 +49,7 @@ cmp.setup({
 			cmp_ultisnips_mappings.jump_backwards(fallback)
 		end, { "i", "s" }),
 	},
---
+	--
 	sources = cmp.config.sources({
 		{ name = 'nvim_lsp' },
 		{ name = 'ultisnips' },
@@ -66,9 +69,9 @@ cmp.setup({
 --
 local on_attach = function(_, bufnr)
 	-- local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
---
+	--
 	local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
---
+	--
 	buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 end
 --
@@ -113,6 +116,7 @@ function Go_org_imports(wait_ms)
 		end
 	end
 end
+
 --
 util.cmd("autocmd BufWritePre *.go lua Go_org_imports()")
 --
@@ -140,6 +144,10 @@ nvim_lsp['lua_ls'].setup {
 		},
 	},
 }
+
+-- typescript
+require 'lspconfig'.tsserver.setup {}
+
 --
 -- jsonnet
 packer.use('neovim/nvim-lspconfig')
@@ -181,15 +189,15 @@ require 'lspconfig'.clangd.setup {}
 --
 local bufopts = { noremap = true, silent = true, buffer = bufnr }
 local opts = { noremap = true, silent = true }
--- vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
--- vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
+vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
 vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
--- vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
+vim.keymap.set('n', '<C-]>', vim.lsp.buf.definition, bufopts)
+vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
 vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
--- vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
+vim.keymap.set('n', '<C-;>', vim.lsp.buf.signature_help, bufopts)
 -- vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
 -- vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
 --[[ vim.keymap.set('n', '<space>wl', function() ]]
