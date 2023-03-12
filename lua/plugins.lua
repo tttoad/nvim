@@ -195,20 +195,57 @@ ultest.setup({
 				end
 				args[#args + 1] = arg
 			end
-			return {
-				dap = {
-					type = 'go',
-					name = 'Debug test',
-					request = 'launch',
-					mode = 'test',
-					showLog = false,
-					program = "./${relativeFileDirname}",
-					args = args,
-				},
-				parse_result = function(lines)
-					return lines[#lines] == "FAIL" and 1 or 0
-				end
-			}
+
+			local mode = vim.fn.inputlist({
+				'Select the debugging mode for unit tests:',
+				'(1):local mode.',
+				'(2):remote mode.',
+				'(3):others use local mode.'
+			})
+
+			-- vim.notify(tonumber(mode), vim.log.levels.INFO, { title = 'DAP' })
+			-- vim.notify(tostring(mode), vim.log.levels.INFO, { title = 'DAP' })
+			if (mode ~= 2)
+			then
+				return {
+					dap = {
+						type = 'go',
+						name = 'Debug test',
+						request = 'launch',
+						mode = 'test',
+						showLog = false,
+						program = "./${relativeFileDirname}",
+						args = args,
+					},
+					parse_result = function(lines)
+						return lines[#lines] == "FAIL" and 1 or 0
+					end
+				}
+			else
+				return {
+					dap = {
+						type = 'delve',
+						name = 'Debug test',
+						request = 'launch',
+						mode = 'test',
+						showLog = false,
+						program = function()
+							return vim.fn.input('Program: ')
+						end,
+						outputMode = 'remote',
+						substitutePath = {
+							{
+								from = "/Users/toad/work",
+								to = "/root",
+							}
+						},
+						args = args,
+					},
+					parse_result = function(lines)
+						return lines[#lines] == "FAIL" and 1 or 0
+					end
+				}
+			end
 		end
 	}
 })
