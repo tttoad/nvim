@@ -9,7 +9,6 @@ require('packer').use({
 local util=require('base.util')
 
 -- nvim-tree
-local tree_cb = require 'nvim-tree.config'.nvim_tree_callback
 util.keymap("", "<F2>", "<cmd> NvimTreeToggle<cr>")
 util.keymap("", "<leader>af", "<cmd> NvimTreeFindFile<cr>")
 
@@ -24,8 +23,8 @@ require("nvim-tree").setup({
 		mappings = {
 			list = {
 				{ key = "u", action = "dir_up" },
-				{ key = "s", cb = tree_cb("split") },
-				{ key = "p", action = "print_path", action_cb = print_node_path },
+				{ key = "s", action = "split" },
+				{ key = "P", action = "print_path", action_cb = print_node_path },
 				{ key = "m", action = "" }
 			},
 		},

@@ -47,6 +47,9 @@ require('packer').startup(function()
 	vim.opt.completeopt = { "menu", "menuone", "noselect" }
 end)
 
+
+local util = require("base.util")
+
 -- load plugin
 require("tree.tree")
 require("base.keymap")
@@ -54,7 +57,7 @@ require("small.group")
 require("lsp.dap")
 require("lsp.lsp")
 
-local util = require("base.util")
+
 
 -- nvim-treesitter
 require 'nvim-treesitter.configs'.setup {
@@ -193,20 +196,55 @@ ultest.setup({
 				end
 				args[#args + 1] = arg
 			end
-			return {
-				dap = {
-					type = 'go';
-					name = 'Debug test';
-					request = 'launch';
-					mode = 'test';
-					showLog = false;
-					program = "./${relativeFileDirname}";
-					args = args;
-				},
-				parse_result = function(lines)
-					return lines[#lines] == "FAIL" and 1 or 0
-				end
-			}
+
+			local mode = vim.fn.inputlist({
+				'Select the debugging mode for unit tests:',
+				'(1):local mode.',
+				'(2):remote mode.',
+				'(3):others use local mode.'
+			})
+
+			if (mode ~= 2)
+			then
+				return {
+					dap = {
+						type = 'go',
+						name = 'Debug test',
+						request = 'launch',
+						mode = 'test',
+						showLog = false,
+						program = "./${relativeFileDirname}",
+						args = args,
+					},
+					parse_result = function(lines)
+						return lines[#lines] == "FAIL" and 1 or 0
+					end
+				}
+			else
+				return {
+					dap = {
+						type = 'delve',
+						name = 'Debug test',
+						request = 'launch',
+						mode = 'test',
+						showLog = false,
+						program = function()
+							return vim.fn.input('Program: ')
+						end,
+						outputMode = 'remote',
+						substitutePath = {
+							{
+								from = "/Users/toad/work",
+								to = "/root",
+							}
+						},
+						args = args,
+					},
+					parse_result = function(lines)
+						return lines[#lines] == "FAIL" and 1 or 0
+					end
+				}
+			end
 		end
 	}
 })
@@ -217,7 +255,6 @@ require 'sniprun'.setup({
 	selected_interpreters = {}, --# use those instead of the default for the current filetype
 	repl_enable = {}, --# enable REPL-like behavior for the given interpreters
 	repl_disable = {}, --# disable REPL-like behavior for the given interpreters
-
 	interpreter_options = { --# interpreter-specific options, see docs / :SnipInfo <name>
 
 		--# use the interpreter name as key
@@ -231,7 +268,6 @@ require 'sniprun'.setup({
 			--# but may not be always respected
 		}
 	},
-
 	--# you can combo different display modes as desired
 	display = {
 		"Classic", --# display results in the command-line  area
@@ -245,19 +281,16 @@ require 'sniprun'.setup({
 		-- "NvimNotify",              --# display with the nvim-notify plugin
 		-- "Api"                      --# return output to a programming interface
 	},
-
 	display_options = {
 		terminal_width = 45, --# change the terminal display option width
 		notification_timeout = 5 --# timeout for nvim_notify output
 	},
-
 	--# You can use the same keys to customize whether a sniprun producing
 	--# no output should display nothing or '(no output)'
 	show_no_output = {
 		"Classic",
 		"TempFloatingWindow", --# implies LongTempFloatingWindow, which has no effect on its own
 	},
-
 	--# customize highlight groups (setting this overrides colorscheme)
 	snipruncolors = {
 		SniprunVirtualTextOk  = { bg = "#66eeff", fg = "#000000", ctermbg = "Cyan", cterfg = "Black" },
@@ -265,7 +298,6 @@ require 'sniprun'.setup({
 		SniprunVirtualTextErr = { bg = "#881515", fg = "#000000", ctermbg = "DarkRed", cterfg = "Black" },
 		SniprunFloatingWinErr = { fg = "#881515", ctermfg = "DarkRed" },
 	},
-
 	--# miscellaneous compatibility/adjustement settings
 	inline_messages = 0, --# inline_message (0/1) is a one-line way to display messages
 	--# to workaround sniprun not being able to display anything
