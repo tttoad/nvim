@@ -49,7 +49,6 @@ cmp.setup({
 			cmp_ultisnips_mappings.jump_backwards(fallback)
 		end, { "i", "s" }),
 	},
-	--
 	sources = cmp.config.sources({
 		{ name = 'nvim_lsp' },
 		{ name = 'ultisnips' },
@@ -69,9 +68,7 @@ cmp.setup({
 --
 local on_attach = function(_, bufnr)
 	-- local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-	--
 	local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-	--
 	buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 end
 --
@@ -116,7 +113,6 @@ function Go_org_imports(wait_ms)
 		end
 	end
 end
-
 --
 util.cmd("autocmd BufWritePre *.go lua Go_org_imports()")
 --
@@ -144,7 +140,6 @@ nvim_lsp['lua_ls'].setup {
 		},
 	},
 }
-
 -- typescript
 require 'lspconfig'.tsserver.setup {}
 

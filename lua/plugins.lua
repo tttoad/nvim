@@ -1,4 +1,5 @@
 require('packer').startup(function()
+
 	use 'wbthomason/packer.nvim'
 	use "morhetz/gruvbox"
 
@@ -203,8 +204,6 @@ ultest.setup({
 				'(3):others use local mode.'
 			})
 
-			-- vim.notify(tonumber(mode), vim.log.levels.INFO, { title = 'DAP' })
-			-- vim.notify(tostring(mode), vim.log.levels.INFO, { title = 'DAP' })
 			if (mode ~= 2)
 			then
 				return {
