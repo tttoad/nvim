@@ -1,16 +1,23 @@
 local packer = require('packer')
--- onedark
 packer.use('navarasu/onedark.nvim')
+packer.use('numToStr/Comment.nvim')
+packer.use({
+	'nvim-lualine/lualine.nvim',
+	requires = { 'kyazdani42/nvim-web-devicons', opt = true }
+})
+packer.use('kevinhwang91/nvim-bqf')
+packer.use('voldikss/vim-floaterm')
+packer.use("windwp/nvim-autopairs")
+packer.use('voldikss/vim-translator')
+packer.use('preservim/tagbar')
+
+-- onedark
 require('onedark').setup {
 	style = 'cool'
 }
 require('onedark').load()
 
 -- lualine
-packer.use({
-	'nvim-lualine/lualine.nvim',
-	requires = { 'kyazdani42/nvim-web-devicons', opt = true }
-})
 
 require('lualine').setup {
 	options = {
@@ -19,12 +26,10 @@ require('lualine').setup {
 }
 
 -- -- nvim-bqf
-packer.use('kevinhwang91/nvim-bqf')
 require('bqf').setup()
 --
 
 -- floaterm
-packer.use('voldikss/vim-floaterm')
 local util = require("base.util")
 util.setVimCommand({
 	"let g:floaterm_keymap_kill ='<F8>'",
@@ -35,7 +40,6 @@ util.setVimCommand({
 })
 
 -- nvim-autopairs
-packer.use("windwp/nvim-autopairs")
 require("nvim-autopairs").setup({
 	disable_filetype = { "TelescopePrompt" },
 })
@@ -49,12 +53,10 @@ cmp.event:on(
 )
 
 -- vim-translator
-packer.use 'voldikss/vim-translator'
 util.keymap("n", "<leader>t", "<Plug>TranslateW")
 util.keymap("v", "<leader>t", "<Plug>TranslateWV")
 
 -- Comment
-packer.use('numToStr/Comment.nvim')
 require('Comment').setup({
 	toggler = {
 		---Line-comment toggle keymap
@@ -70,5 +72,4 @@ require('Comment').setup({
 })
 
 -- tagbar
-packer.use 'preservim/tagbar'
 util.keymap('', "<F3>", "<cmd> TagbarToggle<CR>")
