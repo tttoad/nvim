@@ -21,7 +21,6 @@ packer.use({
 	config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end,
 })
 
-
 packer.use('hrsh7th/cmp-nvim-lsp')
 packer.use('hrsh7th/cmp-buffer')
 packer.use('hrsh7th/cmp-path')
@@ -29,6 +28,7 @@ packer.use('hrsh7th/cmp-cmdline')
 packer.use('hrsh7th/nvim-cmp')
 packer.use('neovim/nvim-lspconfig')
 
+util.keymap('n',"gh","<cmd>lua vim.lsp.buf.code_action()<CR>")
 
 --lsp
 require("cmp_nvim_ultisnips").setup {}
