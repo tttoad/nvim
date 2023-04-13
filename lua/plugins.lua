@@ -4,10 +4,6 @@ require('packer').startup(function()
 	use "morhetz/gruvbox"
 
 	-- For ultisnips users.
-	use { 'SirVer/ultisnips', requires = 'honza/vim-snippets',
-		config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end, }
-	use { 'quangnguyen30192/cmp-nvim-ultisnips',
-		config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end, }
 	use { 'michaelb/sniprun', run = 'bash ./install.sh' }
 
 	use {
@@ -27,7 +23,7 @@ require('packer').startup(function()
 	use {
 		'lewis6991/gitsigns.nvim',
 		-- tag = 'release' -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
-	}
+	}	
 
 	use 'p00f/nvim-ts-rainbow'
 
@@ -53,9 +49,9 @@ local util = require("base.util")
 -- load plugin
 require("tree.tree")
 require("base.keymap")
-require("small.group")
-require("lsp.dap")
 require("lsp.lsp")
+require("lsp.dap")
+require("small.group")
 
 
 

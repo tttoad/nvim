@@ -11,11 +11,24 @@ util.keymap('n', "<leader>c", ":GoCallees<CR>")
 util.keymap('n', "<leader>tg", ":GoAddTags<CR>")
 vim.g.go_def_mapping_enabled = 0
 
+packer.use({
+	'SirVer/ultisnips',
+	requires = 'honza/vim-snippets',
+	config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end,
+})
+packer.use({
+	'quangnguyen30192/cmp-nvim-ultisnips',
+	config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end,
+})
+
 packer.use('hrsh7th/cmp-nvim-lsp')
 packer.use('hrsh7th/cmp-buffer')
 packer.use('hrsh7th/cmp-path')
 packer.use('hrsh7th/cmp-cmdline')
 packer.use('hrsh7th/nvim-cmp')
+packer.use('neovim/nvim-lspconfig')
+
+util.keymap('n',"gh","<cmd>lua vim.lsp.buf.code_action()<CR>")
 
 --lsp
 require("cmp_nvim_ultisnips").setup {}
@@ -113,6 +126,7 @@ function Go_org_imports(wait_ms)
 		end
 	end
 end
+
 --
 util.cmd("autocmd BufWritePre *.go lua Go_org_imports()")
 --
@@ -145,7 +159,6 @@ require 'lspconfig'.tsserver.setup {}
 
 --
 -- jsonnet
-packer.use('neovim/nvim-lspconfig')
 require 'lspconfig'.jsonnet_ls.setup {
 	ext_vars = {
 		foo = 'bar',
