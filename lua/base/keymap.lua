@@ -76,9 +76,6 @@ util.setVimCommand({
 
 	':autocmd InsertEnter * set cul',
 	':autocmd InsertLeave * set nocul',
-})
 
-util.keymap("n", "<leader>bm", ":let $GOFLAGS=\"-tags=darwin\" <CR> :let $GOOS=\"darwin\" <CR> :LspRestart<CR>")
-util.keymap("n", "<leader>bw", ":let $GOFLAGS=\"-tags=windows\" <CR> :let $GOOS=\"windows\"<CR> :LspRestart<CR>")
-util.keymap("n", "<leader>bl", ":let $GOFLAGS=\"-tags=linux\" <CR> :let $GOOS=\"linux\" <CR> :LspRestart<CR>")
-util.keymap("n", "<leader>sw", ":lua require'base.util'.sudoWrite()<CR>")
+	'set splitbelow',
+})

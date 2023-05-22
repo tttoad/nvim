@@ -10,7 +10,7 @@ util.keymap('n', "<leader>f", ":GoReferrers<CR>")
 util.keymap('n', "<leader>c", ":GoCallees<CR>")
 util.keymap('n', "<leader>tg", ":GoAddTags<CR>")
 vim.g.go_def_mapping_enabled = 0
-
+--
 packer.use({
 	'SirVer/ultisnips',
 	requires = 'honza/vim-snippets',
@@ -18,7 +18,9 @@ packer.use({
 })
 packer.use({
 	'quangnguyen30192/cmp-nvim-ultisnips',
-	config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end,
+	config = function()
+		vim.g.UltiSnipsRemoveSelectModeMappings = 0
+	end,
 })
 
 packer.use('hrsh7th/cmp-nvim-lsp')
@@ -28,13 +30,17 @@ packer.use('hrsh7th/cmp-cmdline')
 packer.use('hrsh7th/nvim-cmp')
 packer.use('neovim/nvim-lspconfig')
 
-util.keymap('n',"gh","<cmd>lua vim.lsp.buf.code_action()<CR>")
+util.keymap('n', "gh", "<cmd>lua vim.lsp.buf.code_action()<CR>")
 
 --lsp
 require("cmp_nvim_ultisnips").setup {}
 
 local cmp = require('cmp')
 local cmp_ultisnips_mappings = require("cmp_nvim_ultisnips.mappings")
+
+util.setVimCommand({
+	'let g:UltiSnipsSnippetDirectories=[$HOME."/snippets"]'
+})
 --
 cmp.setup({
 	snippet = {
@@ -104,32 +110,63 @@ nvim_lsp['gopls'].setup {
 				unusedparams = true,
 				shadow = true,
 			},
-			staticcheck = false,
+			staticcheck = true,
+			gofumpt = true,
 		},
 	},
 	init_options = {
 		usePlaceholders = true,
 	}
 }
---
--- order imports
-function Go_org_imports(wait_ms)
-	local params = vim.lsp.util.make_range_params()
-	params.context = { only = { "source.organizeImports" } }
-	local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
-	for cid, res in pairs(result or {}) do
-		for _, r in pairs(res.result or {}) do
-			if r.edit then
-				local enc = (vim.lsp.get_client_by_id(cid) or {}).offset_encoding or "utf-16"
-				vim.lsp.util.apply_workspace_edit(r.edit, enc)
-			end
-		end
-	end
+
+function CoustmGoFlags()
+	local flags = vim.fn.input("GOFLAGS:")
+	util.cmd("let $GOFLAGS=\"-tags=" .. flags .. "\"")
+	util.cmd("LspRestart")
 end
 
+util.keymap("n", "<leader>bm", ":let $GOFLAGS=\"-tags=darwin\" <CR> :let $GOOS=\"darwin\" <CR> :LspRestart<CR>")
+util.keymap("n", "<leader>bw", ":let $GOFLAGS=\"-tags=windows\" <CR> :let $GOOS=\"windows\"<CR> :LspRestart<CR>")
+util.keymap("n", "<leader>bl", ":let $GOFLAGS=\"-tags=linux\" <CR> :let $GOOS=\"linux\" <CR> :LspRestart<CR>")
+util.keymap("n", "<leader>bb", ":lua require'lsp.lsp'CoustmGoFlags()<CR>")
+util.keymap("n", "<leader>sw", ":lua require'base.util'.sudoWrite()<CR>")
+-- --
+-- -- order imports
+-- function Go_org_imports(wait_ms)
+-- 	local params = vim.lsp.util.make_range_params()
+-- 	params.context = { only = { "source.organizeImports" } }
+-- 	local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
+-- 	for cid, res in pairs(result or {}) do
+-- 		for _, r in pairs(res.result or {}) do
+-- 			if r.edit then
+-- 				local enc = (vim.lsp.get_client_by_id(cid) or {}).offset_encoding or "utf-16"
+-- 				vim.lsp.util.apply_workspace_edit(r.edit, enc)
+-- 			end
+-- 		end
+-- 	end
+-- end
 --
-util.cmd("autocmd BufWritePre *.go lua Go_org_imports()")
+-- --
+-- util.cmd("autocmd BufWritePre *.go lua Go_org_imports()")
 --
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = { "*.go" },
+	callback = function()
+		local params = vim.lsp.util.make_range_params(nil, vim.lsp.util._get_offset_encoding())
+		params.context = { only = { "source.organizeImports" } }
+
+		local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
+		for _, res in pairs(result or {}) do
+			for _, r in pairs(res.result or {}) do
+				if r.edit then
+					vim.lsp.util.apply_workspace_edit(r.edit, vim.lsp.util._get_offset_encoding())
+				else
+					vim.lsp.buf.execute_command(r.command)
+				end
+			end
+		end
+	end,
+})
 -- lua
 nvim_lsp['lua_ls'].setup {
 	settings = {
@@ -215,7 +252,9 @@ vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
 vim.keymap.set('', '<leader>rn', vim.lsp.buf.rename, bufopts)
 vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
 vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-vim.keymap.set('', '<C-R>', vim.lsp.buf.formatting, bufopts)
+vim.keymap.set('', '<C-R>', function()
+	vim.lsp.buf.format { async = true }
+end, bufopts)
 --
 -- Set configuration for specific filetype.
 cmp.setup.filetype('gitcommit', {
