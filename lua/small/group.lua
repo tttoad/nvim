@@ -39,6 +39,8 @@ util.setVimCommand({
 	"let g:floaterm_keymap_toggle ='<F12>'"
 })
 
+util.keymap("","<leader>lg","<cmd>FloatermNew --width=3000 --height=3000 lazygit<CR>")
+
 -- nvim-autopairs
 require("nvim-autopairs").setup({
 	disable_filetype = { "TelescopePrompt" },

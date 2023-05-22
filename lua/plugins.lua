@@ -1,5 +1,4 @@
 require('packer').startup(function()
-
 	use 'wbthomason/packer.nvim'
 	use "morhetz/gruvbox"
 

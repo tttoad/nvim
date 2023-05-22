@@ -37,50 +37,50 @@ dap.adapters.go = {
 dap.set_log_level('TRACE')
 dap.configurations.go = {
 	{
-		type = 'go';
-		name = 'Debug';
-		request = 'launch';
+		type = 'go',
+		name = 'Debug',
+		request = 'launch',
 		-- showLog = true;
-		program = "${file}";
+		program = "${file}",
 	},
 	{
-		type = 'go';
-		name = 'Debug-args';
-		request = 'launch';
+		type = 'go',
+		name = 'Debug-args',
+		request = 'launch',
 		-- showLog = true;
-		program = "${file}";
+		program = "${file}",
 		args = function()
 			local args_string = vim.fn.input('Arguments: ')
 			return vim.split(args_string, " +")
-		end;
+		end,
 	},
 
 	{
-		type = 'go';
-		name = 'workspace-args';
-		request = 'launch';
+		type = 'go',
+		name = 'workspace-args',
+		request = 'launch',
 		-- showLog = true;
-		program = "${workspaceFolder}";
+		program = "${workspaceFolder}",
 		-- dlvToolPath = vim.fn.exepath('dlv');  -- Adjust to where delve is installed
 		args = function()
 			local args_string = vim.fn.input('Arguments: ')
 			-- return vim.split(args_string, " +")
 			return util.splitArgs(args_string)
-		end;
+		end,
 	},
 	{
-		type = 'delve';
-		name = 'remote-default';
-		request = 'launch';
-		mode = "debug";
+		type = 'delve',
+		name = 'remote-default',
+		request = 'launch',
+		mode = "debug",
 		program = function()
 			return vim.fn.input('Program: ')
-		end;
-		outputMode = 'remote';
+		end,
+		outputMode = 'remote',
 		substitutePath = {
 			{
-				from = "/Users/toad/work";
-				to = "/root";
+				from = "/Users/toad/work",
+				to = "/root",
 			}
 		},
 		args = function()
@@ -91,22 +91,22 @@ dap.configurations.go = {
 	},
 
 	{
-		type = 'delve';
-		name = 'remote';
-		request = 'launch';
-		mode = "debug";
+		type = 'delve',
+		name = 'remote',
+		request = 'launch',
+		mode = "debug",
 		program = function()
 			return vim.fn.input('Program: ')
-		end;
-		outputMode = 'remote';
+		end,
+		outputMode = 'remote',
 		substitutePath = {
 			function()
 				local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
 				return {
-					from = from_to[1];
-					to = from_to[2];
+					from = from_to[1],
+					to = from_to[2],
 				}
-			end;
+			end,
 		},
 		args = function()
 			local args_string = vim.fn.input('Arguments: ')
@@ -115,13 +115,13 @@ dap.configurations.go = {
 		end
 	},
 	{
-		type = 'delve';
-		name = 'remote-test';
-		request = 'launch';
-		mode = "debug";
-		showLog = true;
-		program = "${file}";
-		outputMode = 'remote';
+		type = 'delve',
+		name = 'remote-test',
+		request = 'launch',
+		mode = "debug",
+		showLog = true,
+		program = "${file}",
+		outputMode = 'remote',
 	}
 }
 
@@ -184,5 +184,35 @@ dap.listeners.after.event_exited["dapui_config"] = function()
 	util.cmd("DapVirtualTextDisable")
 end
 
-dapui.setup()
-
+dapui.setup({
+	layouts = { {
+		elements = { {
+			id = "scopes",
+			size = 0.25
+		}, {
+			id = "breakpoints",
+			size = 0.25
+		}, {
+			id = "stacks",
+			size = 0.25
+		}, {
+			id = "watches",
+			size = 0.25
+		} },
+		position = "left",
+		size = 40
+	}, {
+		elements = {
+			{
+				id = "repl",
+				size = 1
+			},
+			-- {
+			-- 	id = "console",
+			-- 	size = 0.5
+			-- }
+		},
+		position = "bottom",
+		size = 10
+	} },
+})
