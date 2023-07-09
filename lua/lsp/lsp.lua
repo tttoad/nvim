@@ -177,6 +177,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 		end
 	end,
 })
+
 -- lua
 nvim_lsp['lua_ls'].setup {
 	settings = {

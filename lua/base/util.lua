@@ -75,24 +75,24 @@ function _M.sudoWrite(tmpfile, filepath)
 end
 
 function _M._echo_multiline(msg)
-  for _, s in ipairs(vim.fn.split(msg, "\n")) do
-    vim.cmd("echom '" .. s:gsub("'", "''") .. "'")
-  end
+	for _, s in ipairs(vim.fn.split(msg, "\n")) do
+		vim.cmd("echom '" .. s:gsub("'", "''") .. "'")
+	end
 end
 
 function _M.info(msg)
-  _M._echo_multiline(msg)
-  vim.cmd("echohl None")
+	_M._echo_multiline(msg)
+	vim.cmd("echohl None")
 end
 
 function _M.warn(msg)
-  _M._echo_multiline(msg)
-  vim.cmd("echohl None")
+	_M._echo_multiline(msg)
+	vim.cmd("echohl None")
 end
 
 function _M.err(msg)
-  _M._echo_multiline(msg)
-  vim.cmd("echohl None")
+	_M._echo_multiline(msg)
+	vim.cmd("echohl None")
 end
 
 function _M.splitArgs(args)
@@ -143,6 +143,18 @@ function _M.splitArgs(args)
 	end
 
 	return result
+end
+
+function _M.GetWorkAbsPath()
+	return vim.fn.getcwd()
+end
+
+function _M.GetFilePath()
+	return vim.fn.expand("%:p")
+end
+
+function _M.GetHomePath()
+	return ""
 end
 
 function _M.test()

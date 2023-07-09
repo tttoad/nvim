@@ -24,15 +24,6 @@ util.keymap("n", "<leader>dg", "<cmd>lua require'dap'.run_to_cursor()<CR>")
 util.keymap("n", "<leader>re", "<cmd>lua require'dap'.repl.toggle()<CR>")
 util.keymap("n", "<leader>du", "<cmd>lua require'dapui'.open({reset=true})")
 
-dap.adapters.go = {
-	type = 'server',
-	port = '${port}',
-	executable = {
-		command = 'dlv',
-		args = { 'dap', '-l', '127.0.0.1:${port}' },
-	}
-}
-
 
 dap.set_log_level('TRACE')
 dap.configurations.go = {
@@ -89,7 +80,6 @@ dap.configurations.go = {
 			return util.splitArgs(args_string)
 		end
 	},
-
 	{
 		type = 'delve',
 		name = 'remote',
@@ -115,12 +105,47 @@ dap.configurations.go = {
 		end
 	},
 	{
+		type = 'delve-docker',
+		name = 'remote',
+		request = 'launch',
+		mode = "debug",
+		-- program = function()
+		-- 	return vim.fn.input('Program: ')
+		-- end,
+		outputMode = 'remote',
+		substitutePath = {
+			function()
+				util.GetWorkAbsPath()
+				-- local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
+				-- return {
+				-- 	from = from_to[1],
+				-- 	to = from_to[2],
+				-- }
+			end,
+		},
+		args = function()
+			local args_string = vim.fn.input('Arguments: ')
+			-- return vim.split(args_string, " +")
+			return util.splitArgs(args_string)
+		end
+	},
+
+	{
 		type = 'delve',
 		name = 'remote-test',
 		request = 'launch',
 		mode = "debug",
 		showLog = true,
 		program = "${file}",
+		outputMode = 'remote',
+	},
+	{
+		type = 'go',
+		name = 'Debug-read-1.txt',
+		request = 'launch',
+		mode = "debug",
+		program = "${file}",
+		stdinFile = "${workspaceFolder}/1.txt",
 		outputMode = 'remote',
 	}
 }
@@ -144,6 +169,16 @@ dap.adapters.delve = function(cb, config)
 		port = port,
 	})
 end
+
+dap.adapters.go = {
+	type = 'server',
+	port = '${port}',
+	executable = {
+		command = 'dlv',
+		args = { 'dap', '-l', '127.0.0.1:${port}' },
+	}
+}
+
 
 
 packer.use('theHamsta/nvim-dap-virtual-text')
@@ -209,7 +244,7 @@ dapui.setup({
 			},
 			-- {
 			-- 	id = "console",
-			-- 	size = 0.5
+			-- 	size = 1
 			-- }
 		},
 		position = "bottom",
