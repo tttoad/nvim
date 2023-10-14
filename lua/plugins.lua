@@ -22,7 +22,7 @@ require('packer').startup(function()
 	use {
 		'lewis6991/gitsigns.nvim',
 		-- tag = 'release' -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
-	}	
+	}
 
 	use 'p00f/nvim-ts-rainbow'
 
@@ -44,6 +44,7 @@ end)
 
 
 local util = require("base.util")
+local log = require("base.log")
 
 -- load plugin
 require("tree.tree")
@@ -51,6 +52,7 @@ require("base.keymap")
 require("lsp.lsp")
 require("lsp.dap")
 require("small.group")
+require("docker.docker")
 
 
 
@@ -199,8 +201,33 @@ ultest.setup({
 				'(3):others use local mode.'
 			})
 
-			if (mode ~= 2)
-			then
+			if (mode ~= 2) then
+				vim.cmd("redraw")
+				mode = vim.fn.inputlist({
+					'Select the debugging mode for unit tests:',
+					'(1):single function.',
+					'(2):single file.',
+					'(3):dir.'
+				})
+
+				local program = ""
+				if (mode == 2) then
+					program = "${file}"
+				elseif (mode == 3) then
+					program = "./${relativeFileDirname}"
+				else
+					program = "./${relativeFileDirname}"
+					local fn = vim.fn.expand('<cword>')
+					local isBench = string.find(fn, "Benchmark")
+					if (isBench == nil) then
+						args[#args + 1] = "-test.run"
+					else
+						args[#args + 1] = "-benchmem -test.bench "
+					end
+
+					args[#args + 1] = vim.fn.expand('<cword>')
+				end
+
 				return {
 					dap = {
 						type = 'go',
@@ -208,7 +235,7 @@ ultest.setup({
 						request = 'launch',
 						mode = 'test',
 						showLog = false,
-						program = "./${relativeFileDirname}",
+						program = program,
 						args = args,
 					},
 					parse_result = function(lines)

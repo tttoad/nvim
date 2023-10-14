@@ -109,9 +109,6 @@ dap.configurations.go = {
 		name = 'remote',
 		request = 'launch',
 		mode = "debug",
-		-- program = function()
-		-- 	return vim.fn.input('Program: ')
-		-- end,
 		outputMode = 'remote',
 		substitutePath = {
 			function()
@@ -125,7 +122,6 @@ dap.configurations.go = {
 		},
 		args = function()
 			local args_string = vim.fn.input('Arguments: ')
-			-- return vim.split(args_string, " +")
 			return util.splitArgs(args_string)
 		end
 	},
@@ -138,6 +134,12 @@ dap.configurations.go = {
 		showLog = true,
 		program = "${file}",
 		outputMode = 'remote',
+		args = function()
+			local args_string = vim.fn.input('Arguments: ')
+			return util.splitArgs(args_string)
+		end,
+		dlvCwd = "/Users/toad/go/go1.19/src/gitlab.jiagouyun.com/cloudcare-tools/kodo"
+
 	},
 	{
 		type = 'go',
@@ -150,9 +152,6 @@ dap.configurations.go = {
 	}
 }
 
-
--- BUG: Get console output is not supported.
--- https://github.com/go-delve/delve/pull/3253
 dap.adapters.delve = function(cb, config)
 	local host = vim.fn.input('host:')
 	local port = vim.fn.input('port:')
@@ -167,6 +166,14 @@ dap.adapters.delve = function(cb, config)
 		type = 'server',
 		host = host,
 		port = port,
+	})
+end
+
+dap.adapters.docker = function(cb, config)
+	cb({
+		type = 'server',
+		host = '127.0.0.1',
+		port = '38697',
 	})
 end
 
@@ -212,11 +219,13 @@ end
 
 dap.listeners.after.event_terminated["dapui_config"] = function()
 	util.cmd("DapVirtualTextDisable")
+	util.cmd("NvimTreeResize 40")
 end
+
 dap.listeners.after.event_exited["dapui_config"] = function()
 	dapui.close({})
-	util.cmd("NvimTreeRefresh")
 	util.cmd("DapVirtualTextDisable")
+	util.cmd("NvimTreeResize 40")
 end
 
 dapui.setup({

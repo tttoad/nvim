@@ -41,6 +41,7 @@ util.setVimCommand({
 	"let g:floaterm_autoclose=v:true"
 })
 
+util.keymap("","<leader>fa","<cmd>FloatermNew --width=0.8 --height=0.8 <CR>")
 util.keymap("","<leader>lg","<cmd>FloatermNew --width=3000 --height=3000 lazygit<CR>")
 
 -- nvim-autopairs

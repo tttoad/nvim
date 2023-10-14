@@ -1,10 +1,11 @@
 local _M = {}
+local log = require('base.log')
 
 function _M.cmd(cmdStr)
 	vim.api.nvim_command(cmdStr)
 end
 
-local function split(str, reps)
+function _M.split(str, reps)
 	local resultStrList = {}
 	_ = string.gsub(str, '[^' .. reps .. ']+', function(w)
 		table.insert(resultStrList, w)
@@ -18,7 +19,7 @@ end
 
 function _M.setVimKeyMap(keyMap)
 	for _, val in pairs(keyMap) do
-		local args = split(val, " ")
+		local args = _M.split(val, " ")
 		local model = string.sub(args[1], 1, 1)
 
 		if (model == 'm') then
@@ -40,13 +41,13 @@ function _M.sudoExec(cmd, print_output)
 	local password = vim.fn.inputsecret("Password: ")
 	vim.fn.inputrestore()
 	if not password or #password == 0 then
-		_M.warn("Invalid password, sudo aborted")
+		log.warn("Invalid password, sudo aborted")
 		return false
 	end
 	local out = vim.fn.system(string.format("sudo -p '' -S %s", cmd), password)
 	if vim.v.shell_error ~= 0 then
 		print("\r\n")
-		_M.err(out)
+		log.err(out)
 		return false
 	end
 	if print_output then print("\r\n", out) end
@@ -57,7 +58,7 @@ function _M.sudoWrite(tmpfile, filepath)
 	if not tmpfile then tmpfile = vim.fn.tempname() end
 	if not filepath then filepath = vim.fn.expand("%") end
 	if not filepath or #filepath == 0 then
-		_M.err("E32: No file name")
+		log.err("E32: No file name")
 		return
 	end
 	-- `bs=1048576` is equivalent to `bs=1M` for GNU dd or `bs=1m` for BSD dd
@@ -68,33 +69,34 @@ function _M.sudoWrite(tmpfile, filepath)
 	-- no need to check error as this fails the entire function
 	vim.api.nvim_exec(string.format("write! %s", tmpfile), true)
 	if _M.sudoExec(cmd) then
-		_M.info(string.format([[\r\n"%s" written]], filepath))
+		log.info(string.format([[\r\n"%s" written]], filepath))
 		vim.cmd("e!")
 	end
 	vim.fn.delete(tmpfile)
 end
 
-function _M._echo_multiline(msg)
-	for _, s in ipairs(vim.fn.split(msg, "\n")) do
-		vim.cmd("echom '" .. s:gsub("'", "''") .. "'")
-	end
-end
-
-function _M.info(msg)
-	_M._echo_multiline(msg)
-	vim.cmd("echohl None")
-end
-
-function _M.warn(msg)
-	_M._echo_multiline(msg)
-	vim.cmd("echohl None")
-end
-
-function _M.err(msg)
-	_M._echo_multiline(msg)
-	vim.cmd("echohl None")
-end
-
+--
+-- function _M._echo_multiline(msg)
+-- 	for _, s in ipairs(vim.fn.split(msg, "\n")) do
+-- 		vim.cmd("echom '" .. s:gsub("'", "''") .. "'")
+-- 	end
+-- end
+--
+-- function _M.info(msg)
+-- 	_M._echo_multiline(msg)
+-- 	vim.cmd("echohl None")
+-- end
+--
+-- function _M.warn(msg)
+-- 	_M._echo_multiline(msg)
+-- 	vim.cmd("echohl None")
+-- end
+--
+-- function _M.err(msg)
+-- 	_M._echo_multiline(msg)
+-- 	vim.cmd("echohl None")
+-- end
+--
 function _M.splitArgs(args)
 	local nextIndex = 0
 	local result = {}
@@ -155,6 +157,14 @@ end
 
 function _M.GetHomePath()
 	return ""
+end
+
+function _M.GetWorkLastPath()
+	local project = ""
+	_ = string.gsub(_M.GetWorkAbsPath(), '[^/]+', function(w)
+		project = w
+	end)
+	return project
 end
 
 function _M.test()
