@@ -13,6 +13,10 @@ function _M.split(str, reps)
 	return resultStrList
 end
 
+function _M.TrimSpaces(str)
+	return string.gsub(str, "^%s*(.-)%s*$", "%1")
+end
+
 function _M.keymap(model, key, val)
 	vim.keymap.set(model, key, val)
 end
@@ -165,6 +169,56 @@ function _M.GetWorkLastPath()
 		project = w
 	end)
 	return project
+end
+
+function _M.FormatVar(line, _)
+	local arr = _M.split(_M.TrimSpaces(line), " ")
+	if #arr == 0 then
+		return ""
+	end
+
+	local str = arr[1]
+	local startIndex, endIndex = string.find(line, str)
+	local result = ""
+	local pre = false
+	if string.find(str, "_") then
+		-- to humps
+		for i = 1, #str do
+			local c = str:sub(i, i)
+			if pre then
+				result = result .. string.upper(c)
+				pre = false
+				goto continue
+			end
+			if c == '_' then
+				pre = true
+				goto continue
+			end
+			result = result .. c
+			:: continue ::
+		end
+	else
+		local first = str:sub(1, 1)
+		if first >= 'a' and first <= 'z' then
+			result = string.upper(first) .. str:sub(2)
+		else
+			for i = 1, #str do
+				local c = str:sub(i, i)
+				if i == 1 then
+					result = result .. string.lower(c)
+					goto continue
+				end
+				if c >= 'A' and c <= 'Z' then
+					result = result .. '_' .. string.lower(c)
+					goto continue
+				end
+				result = result .. c
+				:: continue ::
+			end
+		end
+	end
+
+	return line:sub(0, startIndex - 1) .. result .. line:sub(endIndex + 1)
 end
 
 function _M.test()

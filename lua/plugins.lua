@@ -222,7 +222,7 @@ ultest.setup({
 					if (isBench == nil) then
 						args[#args + 1] = "-test.run"
 					else
-						args[#args + 1] = "-benchmem -test.bench "
+						args[#args + 1] = "-test.bench"
 					end
 
 					args[#args + 1] = vim.fn.expand('<cword>')

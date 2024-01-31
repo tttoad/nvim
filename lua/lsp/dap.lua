@@ -11,6 +11,70 @@ function CloseDebug()
 	require 'nvim-dap-virtual-text'.disable()
 end
 
+local debugWindowsAll = {
+	layouts = {
+		{
+			elements = { {
+				id = "scopes",
+				size = 0.25
+			}, {
+				id = "breakpoints",
+				size = 0.25
+			}, {
+				id = "stacks",
+				size = 0.25
+			}, {
+				id = "watches",
+				size = 0.25
+			} },
+			position = "left",
+			size = 40
+		},
+		{
+			elements = {
+				{
+					id = "repl",
+					size = 0.5
+				},
+				{
+					id = "console",
+					size = 0.5
+				}
+			},
+			position = "bottom",
+			size = 10
+		}
+	},
+}
+
+local debugWindowsOnlyConsole = {
+	layouts = {
+		{
+			elements = {
+				{
+					id = "repl",
+					size = 1
+				},
+			},
+			position = "bottom",
+			size = 10
+		}
+	},
+}
+
+local debugWindows = ""
+function TaggleDebugWindows()
+	if debugWindows == "terminal" then
+		require 'dapui'.setup(debugWindowsAll)
+		require 'dapui'.toggle({ reset = true })
+		debugWindows = "all"
+	else
+		require 'dapui'.setup(debugWindowsOnlyConsole)
+		require 'dapui'.toggle({ reset = true })
+		debugWindows = "terminal"
+	end
+end
+
 util.keymap("n", "<leader>db", "<cmd>lua require'dap'.toggle_breakpoint()<CR>")
 util.keymap("n", "<leader>dt", "<cmd>lua require'dap'.terminate()<CR>")
 util.keymap("n", "<leader>ds", "<cmd>lua CloseDebug()<CR>")
@@ -22,8 +86,8 @@ util.keymap("n", "<F6>", "<cmd>lua require'dap'.step_into()<CR>")
 util.keymap("n", "<F7>", "<cmd>lua require'dap'.step_out()<CR>")
 util.keymap("n", "<leader>dg", "<cmd>lua require'dap'.run_to_cursor()<CR>")
 util.keymap("n", "<leader>re", "<cmd>lua require'dap'.repl.toggle()<CR>")
-util.keymap("n", "<leader>du", "<cmd>lua require'dapui'.open({reset=true})")
-
+util.keymap("n", "<leader>du", "<cmd>lua require'dapui'.open({reset=true})<CR>")
+util.keymap("n", "<leader>da", "<cmd>lua TaggleDebugWindows()<CR>")
 
 dap.set_log_level('TRACE')
 dap.configurations.go = {
@@ -31,8 +95,9 @@ dap.configurations.go = {
 		type = 'go',
 		name = 'Debug',
 		request = 'launch',
-		-- showLog = true;
 		program = "${file}",
+		-- args = function ()
+		-- end
 	},
 	{
 		type = 'go',
@@ -134,12 +199,11 @@ dap.configurations.go = {
 		showLog = true,
 		program = "${file}",
 		outputMode = 'remote',
+		workingDir = "/Users/toad/work/kodo/",
 		args = function()
 			local args_string = vim.fn.input('Arguments: ')
 			return util.splitArgs(args_string)
 		end,
-		dlvCwd = "/Users/toad/go/go1.19/src/gitlab.jiagouyun.com/cloudcare-tools/kodo"
-
 	},
 	{
 		type = 'go',
@@ -186,8 +250,6 @@ dap.adapters.go = {
 	}
 }
 
-
-
 packer.use('theHamsta/nvim-dap-virtual-text')
 -- nvim-dap-virtual-text
 require("nvim-dap-virtual-text").setup({
@@ -209,7 +271,9 @@ util.keymap('n', "<leader>k", "<cmd>lua require'dapui'.eval()<CR>")
 local dapui = require("dapui")
 
 dap.listeners.before.initialize["dapui_config"] = function()
-	dapui.open({ reset = true })
+	dapui.setup(debugWindowsOnlyConsole)
+	dapui.toggle({ reset = true })
+	debugWindows = "terminal"
 	util.cmd("DapVirtualTextEnable")
 end
 
@@ -228,35 +292,3 @@ dap.listeners.after.event_exited["dapui_config"] = function()
 	util.cmd("NvimTreeResize 40")
 end
 
-dapui.setup({
-	layouts = { {
-		elements = { {
-			id = "scopes",
-			size = 0.25
-		}, {
-			id = "breakpoints",
-			size = 0.25
-		}, {
-			id = "stacks",
-			size = 0.25
-		}, {
-			id = "watches",
-			size = 0.25
-		} },
-		position = "left",
-		size = 40
-	}, {
-		elements = {
-			{
-				id = "repl",
-				size = 1
-			},
-			-- {
-			-- 	id = "console",
-			-- 	size = 1
-			-- }
-		},
-		position = "bottom",
-		size = 10
-	} },
-})
