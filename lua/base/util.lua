@@ -1,15 +1,20 @@
 local _M = {}
+local log = require('base.log')
 
 function _M.cmd(cmdStr)
 	vim.api.nvim_command(cmdStr)
 end
 
-local function split(str, reps)
+function _M.split(str, reps)
 	local resultStrList = {}
 	_ = string.gsub(str, '[^' .. reps .. ']+', function(w)
 		table.insert(resultStrList, w)
 	end)
 	return resultStrList
+end
+
+function _M.TrimSpaces(str)
+	return string.gsub(str, "^%s*(.-)%s*$", "%1")
 end
 
 function _M.keymap(model, key, val)
@@ -18,7 +23,7 @@ end
 
 function _M.setVimKeyMap(keyMap)
 	for _, val in pairs(keyMap) do
-		local args = split(val, " ")
+		local args = _M.split(val, " ")
 		local model = string.sub(args[1], 1, 1)
 
 		if (model == 'm') then
@@ -40,13 +45,13 @@ function _M.sudoExec(cmd, print_output)
 	local password = vim.fn.inputsecret("Password: ")
 	vim.fn.inputrestore()
 	if not password or #password == 0 then
-		_M.warn("Invalid password, sudo aborted")
+		log.warn("Invalid password, sudo aborted")
 		return false
 	end
 	local out = vim.fn.system(string.format("sudo -p '' -S %s", cmd), password)
 	if vim.v.shell_error ~= 0 then
 		print("\r\n")
-		_M.err(out)
+		log.err(out)
 		return false
 	end
 	if print_output then print("\r\n", out) end
@@ -57,7 +62,7 @@ function _M.sudoWrite(tmpfile, filepath)
 	if not tmpfile then tmpfile = vim.fn.tempname() end
 	if not filepath then filepath = vim.fn.expand("%") end
 	if not filepath or #filepath == 0 then
-		_M.err("E32: No file name")
+		log.err("E32: No file name")
 		return
 	end
 	-- `bs=1048576` is equivalent to `bs=1M` for GNU dd or `bs=1m` for BSD dd
@@ -68,33 +73,34 @@ function _M.sudoWrite(tmpfile, filepath)
 	-- no need to check error as this fails the entire function
 	vim.api.nvim_exec(string.format("write! %s", tmpfile), true)
 	if _M.sudoExec(cmd) then
-		_M.info(string.format([[\r\n"%s" written]], filepath))
+		log.info(string.format([[\r\n"%s" written]], filepath))
 		vim.cmd("e!")
 	end
 	vim.fn.delete(tmpfile)
 end
 
-function _M._echo_multiline(msg)
-  for _, s in ipairs(vim.fn.split(msg, "\n")) do
-    vim.cmd("echom '" .. s:gsub("'", "''") .. "'")
-  end
-end
-
-function _M.info(msg)
-  _M._echo_multiline(msg)
-  vim.cmd("echohl None")
-end
-
-function _M.warn(msg)
-  _M._echo_multiline(msg)
-  vim.cmd("echohl None")
-end
-
-function _M.err(msg)
-  _M._echo_multiline(msg)
-  vim.cmd("echohl None")
-end
-
+--
+-- function _M._echo_multiline(msg)
+-- 	for _, s in ipairs(vim.fn.split(msg, "\n")) do
+-- 		vim.cmd("echom '" .. s:gsub("'", "''") .. "'")
+-- 	end
+-- end
+--
+-- function _M.info(msg)
+-- 	_M._echo_multiline(msg)
+-- 	vim.cmd("echohl None")
+-- end
+--
+-- function _M.warn(msg)
+-- 	_M._echo_multiline(msg)
+-- 	vim.cmd("echohl None")
+-- end
+--
+-- function _M.err(msg)
+-- 	_M._echo_multiline(msg)
+-- 	vim.cmd("echohl None")
+-- end
+--
 function _M.splitArgs(args)
 	local nextIndex = 0
 	local result = {}
@@ -143,6 +149,76 @@ function _M.splitArgs(args)
 	end
 
 	return result
+end
+
+function _M.GetWorkAbsPath()
+	return vim.fn.getcwd()
+end
+
+function _M.GetFilePath()
+	return vim.fn.expand("%:p")
+end
+
+function _M.GetHomePath()
+	return ""
+end
+
+function _M.GetWorkLastPath()
+	local project = ""
+	_ = string.gsub(_M.GetWorkAbsPath(), '[^/]+', function(w)
+		project = w
+	end)
+	return project
+end
+
+function _M.FormatVar(line, _)
+	local arr = _M.split(_M.TrimSpaces(line), " ")
+	if #arr == 0 then
+		return ""
+	end
+
+	local str = arr[1]
+	local startIndex, endIndex = string.find(line, str)
+	local result = ""
+	local pre = false
+	if string.find(str, "_") then
+		-- to humps
+		for i = 1, #str do
+			local c = str:sub(i, i)
+			if pre then
+				result = result .. string.upper(c)
+				pre = false
+				goto continue
+			end
+			if c == '_' then
+				pre = true
+				goto continue
+			end
+			result = result .. c
+			:: continue ::
+		end
+	else
+		local first = str:sub(1, 1)
+		if first >= 'a' and first <= 'z' then
+			result = string.upper(first) .. str:sub(2)
+		else
+			for i = 1, #str do
+				local c = str:sub(i, i)
+				if i == 1 then
+					result = result .. string.lower(c)
+					goto continue
+				end
+				if c >= 'A' and c <= 'Z' then
+					result = result .. '_' .. string.lower(c)
+					goto continue
+				end
+				result = result .. c
+				:: continue ::
+			end
+		end
+	end
+
+	return line:sub(0, startIndex - 1) .. result .. line:sub(endIndex + 1)
 end
 
 function _M.test()

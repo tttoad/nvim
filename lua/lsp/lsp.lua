@@ -3,12 +3,37 @@ local packer = require('packer')
 
 -- vim-go
 packer.use('fatih/vim-go')
+
+function GoAddTagsPlugin()
+	local flags = vim.fn.inputlist({
+		'Select the debugging mode for tags:',
+		'(1):json.',
+		'(2):gorm.',
+		'(3):schema.',
+		'(4):yaml.',
+		'(5):custom.',
+	})
+	if (flags == 2) then
+		util.cmd("GoAddTags gorm")
+	elseif (flags == 3) then
+		util.cmd("GoAddTags schema,required")
+	elseif (flags == 4) then
+		util.cmd("GoAddTags yaml")
+	elseif (flags == 5) then
+		local args = vim.fn.input("args:")
+		util.cmd("GoAddTags " .. args)
+	else
+		util.cmd("GoAddTags")
+	end
+end
+
 util.keymap('', "<F1>", ":GoDocBrowser<CR>")
 util.keymap('n', "<leader><space>i", ":GoImpl ")
 util.keymap('n', "<leader>fill", ":GoFillStruct<CR>")
 util.keymap('n', "<leader>f", ":GoReferrers<CR>")
 util.keymap('n', "<leader>c", ":GoCallees<CR>")
-util.keymap('n', "<leader>tg", ":GoAddTags<CR>")
+util.keymap('n', "<leader>tg", ":lua require'lsp.lsp'GoAddTagsPlugin()<CR>")
+
 vim.g.go_def_mapping_enabled = 0
 --
 packer.use({
@@ -16,21 +41,12 @@ packer.use({
 	requires = 'honza/vim-snippets',
 	config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end,
 })
+
 packer.use({
 	'quangnguyen30192/cmp-nvim-ultisnips',
 	config = function()
 		vim.g.UltiSnipsRemoveSelectModeMappings = 0
 	end,
-})
-
-packer.use({
-	'SirVer/ultisnips',
-	requires = 'honza/vim-snippets',
-	config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end,
-})
-packer.use({
-	'quangnguyen30192/cmp-nvim-ultisnips',
-	config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end,
 })
 
 packer.use('hrsh7th/cmp-nvim-lsp')
@@ -40,7 +56,7 @@ packer.use('hrsh7th/cmp-cmdline')
 packer.use('hrsh7th/nvim-cmp')
 packer.use('neovim/nvim-lspconfig')
 
-util.keymap('n',"gh","<cmd>lua vim.lsp.buf.code_action()<CR>")
+util.keymap('n', "gh", "<cmd>lua vim.lsp.buf.code_action()<CR>")
 
 --lsp
 require("cmp_nvim_ultisnips").setup {}
@@ -129,7 +145,7 @@ nvim_lsp['gopls'].setup {
 	}
 }
 
-function CoustmGoFlags()
+function CustomGoFlags()
 	local flags = vim.fn.input("GOFLAGS:")
 	util.cmd("let $GOFLAGS=\"-tags=" .. flags .. "\"")
 	util.cmd("LspRestart")
@@ -138,7 +154,7 @@ end
 util.keymap("n", "<leader>bm", ":let $GOFLAGS=\"-tags=darwin\" <CR> :let $GOOS=\"darwin\" <CR> :LspRestart<CR>")
 util.keymap("n", "<leader>bw", ":let $GOFLAGS=\"-tags=windows\" <CR> :let $GOOS=\"windows\"<CR> :LspRestart<CR>")
 util.keymap("n", "<leader>bl", ":let $GOFLAGS=\"-tags=linux\" <CR> :let $GOOS=\"linux\" <CR> :LspRestart<CR>")
-util.keymap("n", "<leader>bb", ":lua require'lsp.lsp'CoustmGoFlags()<CR>")
+util.keymap("n", "<leader>bb", ":lua require'lsp.lsp'CustomGoFlags()<CR>")
 util.keymap("n", "<leader>sw", ":lua require'base.util'.sudoWrite()<CR>")
 -- --
 -- -- order imports
@@ -177,6 +193,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 		end
 	end,
 })
+
 -- lua
 nvim_lsp['lua_ls'].setup {
 	settings = {
@@ -244,7 +261,7 @@ require 'lspconfig'.clangd.setup {}
 --
 local bufopts = { noremap = true, silent = true, buffer = bufnr }
 local opts = { noremap = true, silent = true }
-vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
+vim.keymap.set('n', '<space>d', vim.diagnostic.open_float, opts)
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
 vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)

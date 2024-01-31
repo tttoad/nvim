@@ -79,3 +79,8 @@ util.setVimCommand({
 
 	'set splitbelow',
 })
+
+util.keymap("v", "<leader>tt", ": luado return require'base.util'.FormatVar(line,linenr)<CR>")
+util.keymap("n", "<leader>tt", "V: luado return require'base.util'.FormatVar(line,linenr)<CR>")
+util.keymap("n", "<leader>t{", "vi{: luado return require'base.util'.FormatVar(line,linenr)<CR>")
+

@@ -11,6 +11,70 @@ function CloseDebug()
 	require 'nvim-dap-virtual-text'.disable()
 end
 
+local debugWindowsAll = {
+	layouts = {
+		{
+			elements = { {
+				id = "scopes",
+				size = 0.25
+			}, {
+				id = "breakpoints",
+				size = 0.25
+			}, {
+				id = "stacks",
+				size = 0.25
+			}, {
+				id = "watches",
+				size = 0.25
+			} },
+			position = "left",
+			size = 40
+		},
+		{
+			elements = {
+				{
+					id = "repl",
+					size = 0.5
+				},
+				{
+					id = "console",
+					size = 0.5
+				}
+			},
+			position = "bottom",
+			size = 10
+		}
+	},
+}
+
+local debugWindowsOnlyConsole = {
+	layouts = {
+		{
+			elements = {
+				{
+					id = "repl",
+					size = 1
+				},
+			},
+			position = "bottom",
+			size = 10
+		}
+	},
+}
+
+local debugWindows = ""
+function TaggleDebugWindows()
+	if debugWindows == "terminal" then
+		require 'dapui'.setup(debugWindowsAll)
+		require 'dapui'.toggle({ reset = true })
+		debugWindows = "all"
+	else
+		require 'dapui'.setup(debugWindowsOnlyConsole)
+		require 'dapui'.toggle({ reset = true })
+		debugWindows = "terminal"
+	end
+end
+
 util.keymap("n", "<leader>db", "<cmd>lua require'dap'.toggle_breakpoint()<CR>")
 util.keymap("n", "<leader>dt", "<cmd>lua require'dap'.terminate()<CR>")
 util.keymap("n", "<leader>ds", "<cmd>lua CloseDebug()<CR>")
@@ -22,17 +86,8 @@ util.keymap("n", "<F6>", "<cmd>lua require'dap'.step_into()<CR>")
 util.keymap("n", "<F7>", "<cmd>lua require'dap'.step_out()<CR>")
 util.keymap("n", "<leader>dg", "<cmd>lua require'dap'.run_to_cursor()<CR>")
 util.keymap("n", "<leader>re", "<cmd>lua require'dap'.repl.toggle()<CR>")
-util.keymap("n", "<leader>du", "<cmd>lua require'dapui'.open({reset=true})")
-
-dap.adapters.go = {
-	type = 'server',
-	port = '${port}',
-	executable = {
-		command = 'dlv',
-		args = { 'dap', '-l', '127.0.0.1:${port}' },
-	}
-}
-
+util.keymap("n", "<leader>du", "<cmd>lua require'dapui'.open({reset=true})<CR>")
+util.keymap("n", "<leader>da", "<cmd>lua TaggleDebugWindows()<CR>")
 
 dap.set_log_level('TRACE')
 dap.configurations.go = {
@@ -40,8 +95,9 @@ dap.configurations.go = {
 		type = 'go',
 		name = 'Debug',
 		request = 'launch',
-		-- showLog = true;
 		program = "${file}",
+		-- args = function ()
+		-- end
 	},
 	{
 		type = 'go',
@@ -89,7 +145,6 @@ dap.configurations.go = {
 			return util.splitArgs(args_string)
 		end
 	},
-
 	{
 		type = 'delve',
 		name = 'remote',
@@ -115,6 +170,28 @@ dap.configurations.go = {
 		end
 	},
 	{
+		type = 'delve-docker',
+		name = 'remote',
+		request = 'launch',
+		mode = "debug",
+		outputMode = 'remote',
+		substitutePath = {
+			function()
+				util.GetWorkAbsPath()
+				-- local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
+				-- return {
+				-- 	from = from_to[1],
+				-- 	to = from_to[2],
+				-- }
+			end,
+		},
+		args = function()
+			local args_string = vim.fn.input('Arguments: ')
+			return util.splitArgs(args_string)
+		end
+	},
+
+	{
 		type = 'delve',
 		name = 'remote-test',
 		request = 'launch',
@@ -122,12 +199,22 @@ dap.configurations.go = {
 		showLog = true,
 		program = "${file}",
 		outputMode = 'remote',
+		args = function()
+			local args_string = vim.fn.input('Arguments: ')
+			return util.splitArgs(args_string)
+		end,
+	},
+	{
+		type = 'go',
+		name = 'Debug-read-1.txt',
+		request = 'launch',
+		mode = "debug",
+		program = "${file}",
+		stdinFile = "${workspaceFolder}/1.txt",
+		outputMode = 'remote',
 	}
 }
 
-
--- BUG: Get console output is not supported.
--- https://github.com/go-delve/delve/pull/3253
 dap.adapters.delve = function(cb, config)
 	local host = vim.fn.input('host:')
 	local port = vim.fn.input('port:')
@@ -145,6 +232,22 @@ dap.adapters.delve = function(cb, config)
 	})
 end
 
+dap.adapters.docker = function(cb, config)
+	cb({
+		type = 'server',
+		host = '127.0.0.1',
+		port = '38697',
+	})
+end
+
+dap.adapters.go = {
+	type = 'server',
+	port = '${port}',
+	executable = {
+		command = 'dlv',
+		args = { 'dap', '-l', '127.0.0.1:${port}' },
+	}
+}
 
 packer.use('theHamsta/nvim-dap-virtual-text')
 -- nvim-dap-virtual-text
@@ -167,7 +270,9 @@ util.keymap('n', "<leader>k", "<cmd>lua require'dapui'.eval()<CR>")
 local dapui = require("dapui")
 
 dap.listeners.before.initialize["dapui_config"] = function()
-	dapui.open({ reset = true })
+	dapui.setup(debugWindowsOnlyConsole)
+	dapui.toggle({ reset = true })
+	debugWindows = "terminal"
 	util.cmd("DapVirtualTextEnable")
 end
 
@@ -177,42 +282,12 @@ end
 
 dap.listeners.after.event_terminated["dapui_config"] = function()
 	util.cmd("DapVirtualTextDisable")
-end
-dap.listeners.after.event_exited["dapui_config"] = function()
-	dapui.close({})
-	util.cmd("NvimTreeRefresh")
-	util.cmd("DapVirtualTextDisable")
+	util.cmd("NvimTreeResize 40")
 end
 
-dapui.setup({
-	layouts = { {
-		elements = { {
-			id = "scopes",
-			size = 0.25
-		}, {
-			id = "breakpoints",
-			size = 0.25
-		}, {
-			id = "stacks",
-			size = 0.25
-		}, {
-			id = "watches",
-			size = 0.25
-		} },
-		position = "left",
-		size = 40
-	}, {
-		elements = {
-			{
-				id = "repl",
-				size = 1
-			},
-			-- {
-			-- 	id = "console",
-			-- 	size = 0.5
-			-- }
-		},
-		position = "bottom",
-		size = 10
-	} },
-})
+dap.listeners.after.event_exited["dapui_config"] = function()
+	dapui.close({})
+	util.cmd("DapVirtualTextDisable")
+	util.cmd("NvimTreeResize 40")
+end
+

@@ -30,15 +30,18 @@ require('bqf').setup()
 --
 
 -- floaterm
+-- auto close is not work. https://github.com/neovim/neovim/issues/14061
 local util = require("base.util")
 util.setVimCommand({
 	"let g:floaterm_keymap_kill ='<F8>'",
 	"let g:floaterm_keymap_new ='<leader>ft'",
 	"let g:floaterm_keymap_prev ='<F9>'",
 	"let g:floaterm_keymap_next ='<F10>'",
-	"let g:floaterm_keymap_toggle ='<F12>'"
+	"let g:floaterm_keymap_toggle ='<F12>'",
+	"let g:floaterm_autoclose=v:true"
 })
 
+util.keymap("","<leader>fa","<cmd>FloatermNew --width=0.8 --height=0.8 <CR>")
 util.keymap("","<leader>lg","<cmd>FloatermNew --width=3000 --height=3000 lazygit<CR>")
 
 -- nvim-autopairs
