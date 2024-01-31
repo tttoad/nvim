@@ -199,7 +199,6 @@ dap.configurations.go = {
 		showLog = true,
 		program = "${file}",
 		outputMode = 'remote',
-		workingDir = "/Users/toad/work/kodo/",
 		args = function()
 			local args_string = vim.fn.input('Arguments: ')
 			return util.splitArgs(args_string)
