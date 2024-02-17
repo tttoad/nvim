@@ -59,7 +59,7 @@ require("docker.docker")
 -- nvim-treesitter
 require 'nvim-treesitter.configs'.setup {
 	-- A list of parser names, or "all"
-	ensure_installed = { "go", "c" },
+	ensure_installed = { "go", "c" ,  "c", "lua", "vim", "vimdoc", "query" },
 
 	highlight = {
 		-- `false` will disable the whole extension
