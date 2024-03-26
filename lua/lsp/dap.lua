@@ -239,6 +239,28 @@ dap.configurations.go = {
 	},
 
 	{
+		type = 'delve-docker',
+		name = 'remote',
+		request = 'launch',
+		mode = "debug",
+		outputMode = 'remote',
+		substitutePath = {
+			function()
+				util.GetWorkAbsPath()
+				-- local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
+				-- return {
+				-- 	from = from_to[1],
+				-- 	to = from_to[2],
+				-- }
+			end,
+		},
+		args = function()
+			local args_string = vim.fn.input('Arguments: ')
+			return util.splitArgs(args_string)
+		end
+	},
+
+	{
 		type = 'delve',
 		name = 'remote-test',
 		request = 'launch',

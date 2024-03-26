@@ -54,6 +54,10 @@ function _M.TrimSpaces(str)
 	return string.gsub(str, "^%s*(.-)%s*$", "%1")
 end
 
+function _M.TrimSpaces(str)
+	return string.gsub(str, "^%s*(.-)%s*$", "%1")
+end
+
 function _M.keymap(model, key, val)
 	vim.keymap.set(model, key, val)
 end
