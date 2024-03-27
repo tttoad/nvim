@@ -329,7 +329,7 @@ require("nvim-dap-virtual-text").setup({
 })
 
 -- dap-ui
-packer.use({ "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } })
+packer.use({ "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } })
 util.keymap('n', "<leader>k", "<cmd>lua require'dapui'.eval()<CR>")
 
 local dapui = require("dapui")

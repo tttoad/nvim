@@ -33,7 +33,7 @@ require('packer').startup(function()
 
 	-- search
 	use {
-		'nvim-telescope/telescope.nvim', tag = '0.1.0',
+		'nvim-telescope/telescope.nvim', tag = '0.1.5',
 		-- or                            , branch = '0.1.x',
 		requires = { { 'nvim-lua/plenary.nvim' } }
 	}
@@ -53,8 +53,6 @@ require("lsp.lsp")
 require("lsp.dap")
 require("small.group")
 require("docker.docker")
-
-
 
 -- nvim-treesitter
 require 'nvim-treesitter.configs'.setup {
@@ -315,9 +313,9 @@ require 'sniprun'.setup({
 	},
 	--# customize highlight groups (setting this overrides colorscheme)
 	snipruncolors = {
-		SniprunVirtualTextOk  = { bg = "#66eeff", fg = "#000000", ctermbg = "Cyan", cterfg = "Black" },
+		SniprunVirtualTextOk  = { bg = "#66eeff", fg = "#000000", ctermbg = "Cyan", ctermfg = "Black" },
 		SniprunFloatingWinOk  = { fg = "#66eeff", ctermfg = "Cyan" },
-		SniprunVirtualTextErr = { bg = "#881515", fg = "#000000", ctermbg = "DarkRed", cterfg = "Black" },
+		SniprunVirtualTextErr = { bg = "#881515", fg = "#000000", ctermbg = "DarkRed", ctermfg = "Black" },
 		SniprunFloatingWinErr = { fg = "#881515", ctermfg = "DarkRed" },
 	},
 	--# miscellaneous compatibility/adjustement settings
