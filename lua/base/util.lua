@@ -7,10 +7,51 @@ end
 
 function _M.split(str, reps)
 	local resultStrList = {}
+	local size = 0
 	_ = string.gsub(str, '[^' .. reps .. ']+', function(w)
 		table.insert(resultStrList, w)
+		size = size + 1
 	end)
-	return resultStrList
+	return resultStrList, size
+end
+
+function _M.InsertTable(tb, key, val)
+	local keys, size = _M.split(key, ".")
+	local temp = tb
+	for k, v in ipairs(keys) do
+		if k == size then
+			temp[v] = val
+		else
+			if temp[v] == nil or type(temp[v]) ~= "table" then
+				temp[v] = {}
+			end
+			temp = temp[v]
+		end
+	end
+end
+
+function _M.GetValTable(tb, key)
+	local keys, size = _M.split(key, ".")
+	local temp = tb
+	for k, v in ipairs(keys) do
+		if k == size then
+			return temp[v]
+		else
+			if temp[v] == nil then
+				log.warn("table " .. key .. " is nil")
+				return ""
+			end
+			if type(temp[v]) ~= "table" then
+				log.warn("table " .. key .. " in " .. v .. " is not table")
+				return ""
+			end
+			temp = temp[v]
+		end
+	end
+end
+
+function _M.TrimSpaces(str)
+	return string.gsub(str, "^%s*(.-)%s*$", "%1")
 end
 
 function _M.TrimSpaces(str)
@@ -161,6 +202,10 @@ end
 
 function _M.GetHomePath()
 	return ""
+end
+
+function _M.GetFileName()
+	return vim.fn.expand("%")
 end
 
 function _M.GetWorkLastPath()

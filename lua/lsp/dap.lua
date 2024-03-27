@@ -1,5 +1,7 @@
 local util = require("base.util")
 local packer = require('packer')
+local log = require('base.log')
+local workspace = require('lsp.workspace')
 
 packer.use('ravenxrz/DAPInstall.nvim')
 packer.use('mfussenegger/nvim-dap')
@@ -89,7 +91,50 @@ util.keymap("n", "<leader>re", "<cmd>lua require'dap'.repl.toggle()<CR>")
 util.keymap("n", "<leader>du", "<cmd>lua require'dapui'.open({reset=true})<CR>")
 util.keymap("n", "<leader>da", "<cmd>lua TaggleDebugWindows()<CR>")
 
-dap.set_log_level('TRACE')
+-- dap.set_log_level('TRACE')
+
+CheckUseDefault = {
+	NeedCheck = true,
+	UseDefault = false
+}
+
+function WorkspaceConfig(key, cb)
+	local needCB = true
+	if CheckUseDefault.NeedCheck then
+		local keys = util.split(key, ".")
+		if workspace.HasWorkspace() and workspace.GetValue(keys[1]) ~= "" then
+			local input = vim.fn.input("use default last config:")
+			if input == "" or input:sub(0) ~= 'n' then
+				needCB = false
+			end
+		end
+	else
+		needCB = CheckUseDefault.UseDefault
+	end
+	if needCB then
+		local val = cb()
+		workspace.OverwriteFile(key, val)
+		return val, needCB
+	end
+
+	return workspace.GetValue(key), needCB
+end
+
+function GetArgsByWorkspace(key)
+	CheckUseDefault.NeedCheck = true
+	local args, NeedCB = WorkspaceConfig(key .. ".args", function()
+		return vim.fn.input('Arguments: ')
+	end)
+	CheckUseDefault.NeedCheck = false
+	CheckUseDefault.UseDefault = NeedCB
+	return vim.split(args, " +")
+end
+
+function GetExecFileName()
+	return util.GetWorkAbsPath() .. "/" .. util.GetFileName()
+end
+
+-- TODO fix: Multiple calls WorkspaceConfig
 dap.configurations.go = {
 	{
 		type = 'go',
@@ -106,8 +151,7 @@ dap.configurations.go = {
 		-- showLog = true;
 		program = "${file}",
 		args = function()
-			local args_string = vim.fn.input('Arguments: ')
-			return vim.split(args_string, " +")
+			return GetArgsByWorkspace('Debug-args-' .. GetExecFileName())
 		end,
 	},
 
@@ -119,18 +163,23 @@ dap.configurations.go = {
 		program = "${workspaceFolder}",
 		-- dlvToolPath = vim.fn.exepath('dlv');  -- Adjust to where delve is installed
 		args = function()
-			local args_string = vim.fn.input('Arguments: ')
-			-- return vim.split(args_string, " +")
-			return util.splitArgs(args_string)
+			return GetArgsByWorkspace("workspace-args")
 		end,
+
 	},
 	{
 		type = 'delve',
 		name = 'remote-default',
 		request = 'launch',
 		mode = "debug",
+		args = function()
+			return GetArgsByWorkspace("remote-default")
+		end,
 		program = function()
-			return vim.fn.input('Program: ')
+			local config = WorkspaceConfig('remote-default.program', function()
+				return vim.fn.input('program: ')
+			end)
+			return config
 		end,
 		outputMode = 'remote',
 		substitutePath = {
@@ -138,37 +187,57 @@ dap.configurations.go = {
 				from = "/Users/toad/work",
 				to = "/root",
 			}
-		},
-		args = function()
-			local args_string = vim.fn.input('arguments: ')
-			-- return vim.split(args_string, " +")
-			return util.splitArgs(args_string)
-		end
+		}
 	},
 	{
 		type = 'delve',
 		name = 'remote',
 		request = 'launch',
 		mode = "debug",
+		args = function()
+			return GetArgsByWorkspace("remote")
+		end,
 		program = function()
-			return vim.fn.input('Program: ')
+			local config = WorkspaceConfig('remote.program', function()
+				return vim.fn.input('program: ')
+			end)
+			return config
 		end,
 		outputMode = 'remote',
 		substitutePath = {
 			function()
-				local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
-				return {
-					from = from_to[1],
-					to = from_to[2],
-				}
+				local config = WorkspaceConfig('remote.substitutePath', function()
+					local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
+					return {
+						from = from_to[1],
+						to = from_to[2],
+					}
+				end)
+				return config
+			end,
+		},
+	},
+	{
+		type = 'delve-docker',
+		name = 'remote-docker-wip', -- wip
+		request = 'launch',
+		mode = "debug",
+		outputMode = 'remote',
+		substitutePath = {
+			function()
+				util.GetWorkAbsPath()
+				-- local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
+				-- return {
+				-- 	from = from_to[1],
+				-- 	to = from_to[2],
+				-- }
 			end,
 		},
 		args = function()
-			local args_string = vim.fn.input('Arguments: ')
-			-- return vim.split(args_string, " +")
-			return util.splitArgs(args_string)
+			return GetArgsByWorkspace("remote-docker")
 		end
 	},
+
 	{
 		type = 'delve-docker',
 		name = 'remote',
@@ -200,35 +269,31 @@ dap.configurations.go = {
 		program = "${file}",
 		outputMode = 'remote',
 		args = function()
-			local args_string = vim.fn.input('Arguments: ')
-			return util.splitArgs(args_string)
+			return GetArgsByWorkspace("remote-test-" .. GetExecFileName())
 		end,
 	},
-	{
-		type = 'go',
-		name = 'Debug-read-1.txt',
-		request = 'launch',
-		mode = "debug",
-		program = "${file}",
-		stdinFile = "${workspaceFolder}/1.txt",
-		outputMode = 'remote',
-	}
 }
 
 dap.adapters.delve = function(cb, config)
-	local host = vim.fn.input('host:')
-	local port = vim.fn.input('port:')
-	if (host == "") then
-		host = "0.0.0.0"
-	end
+	local sc = WorkspaceConfig('delve', function()
+		local host = vim.fn.input('host:')
+		local port = vim.fn.input('port:')
+		if (host == "") then
+			host = "0.0.0.0"
+		end
 
-	if (port == "") then
-		port = "38697"
-	end
+		if (port == "") then
+			port = "38697"
+		end
+		return {
+			host = host,
+			port = port,
+		}
+	end)
 	cb({
 		type = 'server',
-		host = host,
-		port = port,
+		host = sc["host"],
+		port = sc["port"],
 	})
 end
 
@@ -291,3 +356,16 @@ dap.listeners.after.event_exited["dapui_config"] = function()
 	util.cmd("NvimTreeResize 40")
 end
 
+-- lua
+packer.use("jbyuki/one-small-step-for-vimkind")
+dap.configurations.lua = {
+	{
+		type = 'nlua',
+		request = 'attach',
+		name = "Attach to running Neovim instance",
+	}
+}
+
+dap.adapters.nlua = function(callback, config)
+	callback({ type = 'server', host = config.host or "127.0.0.1", port = config.port or 8086 })
+end
