@@ -1,9 +1,16 @@
+local log = require("base.log")
+local gohelp = require("base.go_help")
 require('packer').startup(function()
 	use 'wbthomason/packer.nvim'
 	use "morhetz/gruvbox"
 
 	-- For ultisnips users.
 	use { 'michaelb/sniprun', run = 'bash ./install.sh' }
+
+	use {
+		'crusj/hierarchy-tree-go.nvim',
+		requires = 'neovim/nvim-lspconfig'
+	}
 
 	use {
 		"nvim-neotest/neotest",
@@ -44,7 +51,6 @@ end)
 
 
 local util = require("base.util")
-local log = require("base.log")
 
 -- load plugin
 require("tree.tree")
@@ -57,7 +63,7 @@ require("docker.docker")
 -- nvim-treesitter
 require 'nvim-treesitter.configs'.setup {
 	-- A list of parser names, or "all"
-	ensure_installed = { "go", "c" ,  "c", "lua", "vim", "vimdoc", "query" },
+	ensure_installed = { "go", "c", "c", "lua", "vim", "vimdoc", "query" },
 
 	highlight = {
 		-- `false` will disable the whole extension
@@ -212,18 +218,20 @@ ultest.setup({
 				if (mode == 2) then
 					program = "${file}"
 				elseif (mode == 3) then
-					program = "./${relativeFileDirname}"
+					program = "${fileDirname}"
+					args[#args + 1] = "-test.v"
 				else
-					program = "./${relativeFileDirname}"
+					program = "${fileDirname}"
 					local fn = vim.fn.expand('<cword>')
 					local isBench = string.find(fn, "Benchmark")
-					if (isBench == nil) then
-						args[#args + 1] = "-test.run"
-					else
-						args[#args + 1] = "-test.bench"
-					end
+					args[#args + 1] = "-test.run"
+					args[#args + 1] = fn
 
-					args[#args + 1] = vim.fn.expand('<cword>')
+					if (isBench ~= nil) then
+						args[#args + 1] = "-test.bench"
+						args[#args + 1] = fn
+						args[#args + 1] = "-test.benchmem"
+					end
 				end
 
 				return {
@@ -232,9 +240,10 @@ ultest.setup({
 						name = 'Debug test',
 						request = 'launch',
 						mode = 'test',
-						showLog = false,
+						showLog = true,
 						program = program,
 						args = args,
+						dlvCwd = gohelp.GetModuleModDir(util.GetFileName()),
 					},
 					parse_result = function(lines)
 						return lines[#lines] == "FAIL" and 1 or 0
@@ -331,5 +340,8 @@ require 'sniprun'.setup({
 util.cmd('let g:UltiSnipsExpandTrigger="<CR>"')
 util.cmd('let g:UltiSnipsJumpForwardTrigger="<c-b>"')
 util.cmd('let g:UltiSnipsJumpBackwardTrigger="<c-z>"')
+
+--
+require("hierarchy-tree-go").setup()
 
 return

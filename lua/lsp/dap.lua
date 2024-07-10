@@ -1,6 +1,6 @@
 local util = require("base.util")
+local log = require("base.log")
 local packer = require('packer')
-local log = require('base.log')
 local workspace = require('lsp.workspace')
 
 packer.use('ravenxrz/DAPInstall.nvim')
@@ -134,7 +134,6 @@ function GetExecFileName()
 	return util.GetWorkAbsPath() .. "/" .. util.GetFileName()
 end
 
--- TODO fix: Multiple calls WorkspaceConfig
 dap.configurations.go = {
 	{
 		type = 'go',
@@ -240,7 +239,7 @@ dap.configurations.go = {
 
 	{
 		type = 'delve-docker',
-		name = 'remote',
+		name = 'remote-wip',
 		request = 'launch',
 		mode = "debug",
 		outputMode = 'remote',
@@ -329,7 +328,11 @@ require("nvim-dap-virtual-text").setup({
 })
 
 -- dap-ui
-packer.use({ "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" } })
+packer.use({
+	"rcarriga/nvim-dap-ui",
+	tag = 'v2.6.0', -- https://github.com/rcarriga/nvim-dap-ui/issues/371
+	requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" }
+})
 util.keymap('n', "<leader>k", "<cmd>lua require'dapui'.eval()<CR>")
 
 local dapui = require("dapui")
