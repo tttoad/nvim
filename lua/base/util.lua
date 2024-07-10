@@ -54,10 +54,6 @@ function _M.TrimSpaces(str)
 	return string.gsub(str, "^%s*(.-)%s*$", "%1")
 end
 
-function _M.TrimSpaces(str)
-	return string.gsub(str, "^%s*(.-)%s*$", "%1")
-end
-
 function _M.keymap(model, key, val)
 	vim.keymap.set(model, key, val)
 end
@@ -264,6 +260,10 @@ function _M.FormatVar(line, _)
 	end
 
 	return line:sub(0, startIndex - 1) .. result .. line:sub(endIndex + 1)
+end
+
+function _M.GetDirByPath(path)
+	return string.match(path, "(.+)/[^/]*%.%w+$")
 end
 
 function _M.test()
