@@ -1,33 +1,20 @@
 local util = require("base.util")
 return {
 	{
-		'navarasu/onedark.nvim',
-		lazy = false,
-		config = function()
-			require('onedark').setup {
-				style = 'cool'
-			}
-			require('onedark').load()
-		end
+		"morhetz/gruvbox",
 	},
 	{
-		'numToStr/Comment.nvim',
+		'navarasu/onedark.nvim',
 		config = function()
-			require('Comment').setup({
-				toggler = {
-					---Line-comment toggle keymap
-					line = '<leader>/',
-					---Block-comment toggle keymap
-					block = '<leader>.',
-				},
-				opleader = {
-					---Line-comment keymap
-					line = '<leader>/',
-					---Block-comment keymap
-					block = '<leader>.',
-				},
-			})
-		end
+			require('onedark').setup {
+				style = 'dark',
+			}
+			require('onedark').load()
+		end,
+		priority = 1000,
+	},
+	{
+		'numToStr/Comment.nvim'
 	},
 	{
 		'nvim-lualine/lualine.nvim',
@@ -35,20 +22,7 @@ return {
 	},
 	{ 'kevinhwang91/nvim-bqf' },
 	{
-		'voldikss/vim-floaterm',
-		config = function()
-			util.setVimCommand({
-				"let g:floaterm_keymap_kill ='<F8>'",
-				"let g:floaterm_keymap_new ='<leader>ft'",
-				"let g:floaterm_keymap_prev ='<F9>'",
-				"let g:floaterm_keymap_next ='<F10>'",
-				"let g:floaterm_keymap_toggle ='<F12>'",
-				"let g:floaterm_autoclose=v:true"
-			})
-
-			util.keymap("", "<leader>fa", "<cmd>FloatermNew --width=0.8 --height=0.8 <CR>")
-			util.keymap("", "<leader>lg", "<cmd>FloatermNew --width=3000 --height=3000 lazygit<CR>")
-		end
+		'voldikss/vim-floaterm'
 	},
 	{
 		"windwp/nvim-autopairs",
