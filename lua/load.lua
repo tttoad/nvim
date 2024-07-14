@@ -9,6 +9,7 @@ util.keymap("n", "C-l", ":sss")
 require('onedark').setup {
 	style = 'dark',
 }
+require('onedark').load()
 require('Comment').setup({
 	toggler = {
 		---Line-comment toggle keymap
@@ -38,7 +39,7 @@ util.keymap("", "<leader>lg", "<cmd>FloatermNew --width=3000 --height=3000 lazyg
 
 require('nvim-treesitter.install').update({ with_sync = true })
 require 'nvim-treesitter.configs'.setup {
-	-- A list of parser names, or "all"
+	-- a list of parser names, or "all"
 	ensure_installed = { "go", "c", "lua", "vim", "vimdoc", "query" },
 
 	highlight = {
@@ -46,16 +47,17 @@ require 'nvim-treesitter.configs'.setup {
 		enable = true,
 		disable = { "lua" },
 
-		-- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-		-- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-		-- Using this option may slow down your editor, and you may see some duplicate highlights.
-		-- Instead of true it can also be a list of languages
+		-- setting this to true will run `:h syntax` and tree-sitter at the same time.
+		-- set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+		-- using this option may slow down your editor, and you may see some duplicate highlights.
+		-- instead of true it can also be a list of languages
 		additional_vim_regex_highlighting = false,
 	},
 	rainbow = {
 		enable = true,
 		-- disable = { "jsx", "cpp" }, list of languages you want to disable the plugin for
-		extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
-		max_file_lines = nil, -- Do not enable for files with more than n lines, int
+		extended_mode = true, -- also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
+		max_file_lines = nil, -- do not enable for files with more than n lines, int
 	},
 }
+require('nvim-treesitter').setup()
