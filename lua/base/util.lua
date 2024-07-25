@@ -38,7 +38,7 @@ function _M.GetValTable(tb, key)
 			return temp[v]
 		else
 			if temp[v] == nil then
-				log.warn("table " .. key .. " is nil")
+				-- log.warn("table " .. key .. " is nil")
 				return ""
 			end
 			if type(temp[v]) ~= "table" then
@@ -196,10 +196,6 @@ function _M.GetFilePath()
 	return vim.fn.expand("%:p")
 end
 
-function _M.GetHomePath()
-	return ""
-end
-
 function _M.GetFileName()
 	return vim.fn.expand("%")
 end
@@ -263,7 +259,7 @@ function _M.FormatVar(line, _)
 end
 
 function _M.GetDirByPath(path)
-	return string.match(path, "(.+)/[^/]*%.%w+$")
+	return string.match(path, "(.+)/[^/]*")
 end
 
 function _M.test()

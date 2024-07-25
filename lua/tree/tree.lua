@@ -13,6 +13,15 @@ util.keymap("", "<leader>af", "<cmd> NvimTreeFindFile<cr>")
 util.keymap("n", "<leader>mn", require("nvim-tree.api").marks.navigate.next)
 util.keymap("n", "<leader>mp", require("nvim-tree.api").marks.navigate.prev)
 util.keymap("n", "<leader>ms", require("nvim-tree.api").marks.navigate.select)
+local function print_node_path()
+	local api = require('nvim-tree.api')
+	local node = api.tree.get_node_under_cursor()
+	print(node.absolute_path)
+end
+
+-- on_attach
+vim.keymap.set('n', '<C-P>', print_node_path)
+
 
 local function my_on_attach(bufnr)
 	local api = require "nvim-tree.api"

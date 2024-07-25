@@ -18,7 +18,7 @@ function _M.GetValue(key)
 
 	local content = file:read("*all")
 	file:close()
-	-- todo Cache
+	-- Todo use yaml
 	return util.GetValTable(json.decode(content), key)
 end
 

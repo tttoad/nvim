@@ -56,7 +56,6 @@ packer.use('hrsh7th/cmp-cmdline')
 packer.use('hrsh7th/nvim-cmp')
 packer.use('neovim/nvim-lspconfig')
 
-util.keymap('n', "gh", "<cmd>lua vim.lsp.buf.code_action()<CR>")
 
 --lsp
 require("cmp_nvim_ultisnips").setup {}
@@ -154,8 +153,11 @@ end
 util.keymap("n", "<leader>bm", ":let $GOFLAGS=\"-tags=darwin\" <CR> :let $GOOS=\"darwin\" <CR> :LspRestart<CR>")
 util.keymap("n", "<leader>bw", ":let $GOFLAGS=\"-tags=windows\" <CR> :let $GOOS=\"windows\"<CR> :LspRestart<CR>")
 util.keymap("n", "<leader>bl", ":let $GOFLAGS=\"-tags=linux\" <CR> :let $GOOS=\"linux\" <CR> :LspRestart<CR>")
-util.keymap("n", "<leader>bb", ":lua require'lsp.lsp'CustomGoFlags()<CR>")
-util.keymap("n", "<leader>sw", ":lua require'base.util'.sudoWrite()<CR>")
+util.keymap("n", "<leader>bb", function()
+	require 'lsp.lsp'
+	CustomGoFlags()
+end)
+util.keymap("n", "<leader>sw", function() require 'base.util'.sudoWrite() end)
 -- --
 -- -- order imports
 -- function Go_org_imports(wait_ms)
@@ -290,6 +292,7 @@ vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
 vim.keymap.set('', '<C-R>', function()
 	vim.lsp.buf.format { async = true }
 end, bufopts)
+vim.keymap.set('n', "gh", vim.lsp.buf.code_action, bufopts)
 --
 -- Set configuration for specific filetype.
 cmp.setup.filetype('gitcommit', {
