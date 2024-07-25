@@ -1,5 +1,6 @@
 local util = require("base.util")
 local log = require("base.log")
+local gohelp = require("base.go_help")
 local packer = require('packer')
 local workspace = require('lsp.workspace')
 
@@ -77,19 +78,20 @@ function TaggleDebugWindows()
 	end
 end
 
-util.keymap("n", "<leader>db", "<cmd>lua require'dap'.toggle_breakpoint()<CR>")
-util.keymap("n", "<leader>dt", "<cmd>lua require'dap'.terminate()<CR>")
-util.keymap("n", "<leader>ds", "<cmd>lua CloseDebug()<CR>")
-util.keymap("n", "<leader>dc", "<cmd>lua require'dap'.continue()<CR>")
-util.keymap("n", "<leader>dlb", "<cmd>lua require'dap'.list_breakpoints()<CR>")
-util.keymap("n", "<leader>dcb", "<cmd>lua require'dap'.clear_breakpoints()<CR>")
-util.keymap("n", "<F5>", "<cmd>lua require'dap'.step_over()<CR>")
-util.keymap("n", "<F6>", "<cmd>lua require'dap'.step_into()<CR>")
-util.keymap("n", "<F7>", "<cmd>lua require'dap'.step_out()<CR>")
-util.keymap("n", "<leader>dg", "<cmd>lua require'dap'.run_to_cursor()<CR>")
-util.keymap("n", "<leader>re", "<cmd>lua require'dap'.repl.toggle()<CR>")
-util.keymap("n", "<leader>du", "<cmd>lua require'dapui'.open({reset=true})<CR>")
-util.keymap("n", "<leader>da", "<cmd>lua TaggleDebugWindows()<CR>")
+util.keymap("n", "<leader>db", function() require 'dap'.toggle_breakpoint() end)
+util.keymap("n", "<leader>dt", function() require 'dap'.terminate() end)
+util.keymap("n", "<leader>ds", function() CloseDebug() end)
+util.keymap('n', '<Leader>dl', function() require('dap').run_last() end)
+util.keymap("n", "<leader>dc", function() require 'dap'.continue() end)
+util.keymap("n", "<leader>dlb", function() require 'dap'.list_breakpoints() end)
+util.keymap("n", "<leader>dcb", function() require 'dap'.clear_breakpoints() end)
+util.keymap("n", "<F5>", function() require 'dap'.step_over() end)
+util.keymap("n", "<F6>", function() require 'dap'.step_into() end)
+util.keymap("n", "<F7>", function() require 'dap'.step_out() end)
+util.keymap("n", "<leader>dg", function() require 'dap'.run_to_cursor() end)
+util.keymap("n", "<leader>re", function() require 'dap'.repl.toggle() end)
+util.keymap("n", "<leader>du", function() require 'dapui'.open({ reset = true }) end)
+util.keymap("n", "<leader>da", function() TaggleDebugWindows() end)
 
 -- dap.set_log_level('TRACE')
 
@@ -140,31 +142,48 @@ dap.configurations.go = {
 		name = 'Debug',
 		request = 'launch',
 		program = "${file}",
-		-- args = function ()
-		-- end
 	},
 	{
 		type = 'go',
 		name = 'Debug-args',
 		request = 'launch',
-		-- showLog = true;
 		program = "${file}",
 		args = function()
 			return GetArgsByWorkspace('Debug-args-' .. GetExecFileName())
 		end,
 	},
-
+	{
+		type = 'docker',
+		name = 'local-docker',
+		request = 'launch',
+		mode = "debug",
+		outputMode = 'remote',
+		program = function()
+			local fileName = util.GetFileName()
+			local workPath = gohelp.GetModuleModDir(fileName)
+			return string.gsub(fileName, workPath, "")
+		end,
+		substitutePath = {
+			function()
+				local workPath = gohelp.GetModuleModDir(util.GetFileName())
+				return {
+					from = util.GetDirByPath(workPath),
+					to = "/root",
+				}
+			end,
+		},
+		args = function()
+			return GetArgsByWorkspace("local-docker")
+		end
+	},
 	{
 		type = 'go',
 		name = 'workspace-args',
 		request = 'launch',
-		-- showLog = true;
 		program = "${workspaceFolder}",
-		-- dlvToolPath = vim.fn.exepath('dlv');  -- Adjust to where delve is installed
 		args = function()
 			return GetArgsByWorkspace("workspace-args")
 		end,
-
 	},
 	{
 		type = 'delve',
@@ -218,27 +237,6 @@ dap.configurations.go = {
 	},
 	{
 		type = 'delve-docker',
-		name = 'remote-docker-wip', -- wip
-		request = 'launch',
-		mode = "debug",
-		outputMode = 'remote',
-		substitutePath = {
-			function()
-				util.GetWorkAbsPath()
-				-- local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
-				-- return {
-				-- 	from = from_to[1],
-				-- 	to = from_to[2],
-				-- }
-			end,
-		},
-		args = function()
-			return GetArgsByWorkspace("remote-docker")
-		end
-	},
-
-	{
-		type = 'delve-docker',
 		name = 'remote-wip',
 		request = 'launch',
 		mode = "debug",
@@ -246,11 +244,6 @@ dap.configurations.go = {
 		substitutePath = {
 			function()
 				util.GetWorkAbsPath()
-				-- local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
-				-- return {
-				-- 	from = from_to[1],
-				-- 	to = from_to[2],
-				-- }
 			end,
 		},
 		args = function()
@@ -273,7 +266,7 @@ dap.configurations.go = {
 	},
 }
 
-dap.adapters.delve = function(cb, config)
+dap.adapters.delve = function(cb)
 	local sc = WorkspaceConfig('delve', function()
 		local host = vim.fn.input('host:')
 		local port = vim.fn.input('port:')
@@ -297,10 +290,12 @@ dap.adapters.delve = function(cb, config)
 end
 
 dap.adapters.docker = function(cb, config)
+	local workPath = gohelp.GetModuleModDir(util.GetFileName())
+	local port = gohelp.StartDebugDocker(workPath)
 	cb({
 		type = 'server',
-		host = '127.0.0.1',
-		port = '38697',
+		host = '0.0.0.0',
+		port = port,
 	})
 end
 
@@ -333,7 +328,7 @@ packer.use({
 	tag = 'v2.6.0', -- https://github.com/rcarriga/nvim-dap-ui/issues/371
 	requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" }
 })
-util.keymap('n', "<leader>k", "<cmd>lua require'dapui'.eval()<CR>")
+util.keymap('n', "<leader>k", function() require 'dapui'.eval() end)
 
 local dapui = require("dapui")
 

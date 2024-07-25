@@ -47,7 +47,7 @@ function _M.StopGoDebug()
 	end
 end
 
-util.keymap("n", "<leader>dri", "<cmd>lua require'docker.docker'.StartGoDebug()<CR>")
-util.keymap("n", "<leader>dsi", "<cmd>lua require'docker.docker'.StopGoDebug()<CR>")
+util.keymap("n", "<leader>dri", function() require 'docker.docker'.StartGoDebug() end)
+util.keymap("n", "<leader>dsi", function() require 'docker.docker'.StopGoDebug() end)
 
 return _M
