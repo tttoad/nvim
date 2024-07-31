@@ -73,7 +73,7 @@ util.setVimCommand({
 	'set completeopt=menu,menuone,noselect',
 	'set signcolumn=yes',
 	'set autowriteall',
-
+	'set autoread',
 	':autocmd InsertEnter * set cul',
 	':autocmd InsertLeave * set nocul',
 
@@ -83,4 +83,3 @@ util.setVimCommand({
 util.keymap("v", "<leader>tt", ": luado return require'base.util'.FormatVar(line,linenr)<CR>")
 util.keymap("n", "<leader>tt", "V: luado return require'base.util'.FormatVar(line,linenr)<CR>")
 util.keymap("n", "<leader>t{", "vi{: luado return require'base.util'.FormatVar(line,linenr)<CR>")
-

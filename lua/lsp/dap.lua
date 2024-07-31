@@ -3,6 +3,7 @@ local log = require("base.log")
 local gohelp = require("base.go_help")
 local packer = require('packer')
 local workspace = require('lsp.workspace')
+local json = require "json.json-beautify"
 
 packer.use('ravenxrz/DAPInstall.nvim')
 packer.use('mfussenegger/nvim-dap')
@@ -100,11 +101,10 @@ CheckUseDefault = {
 	UseDefault = false
 }
 
-function WorkspaceConfig(key, cb)
+function WorkspaceConfig(startupSign, key, cb)
 	local needCB = true
 	if CheckUseDefault.NeedCheck then
-		local keys = util.split(key, ".")
-		if workspace.HasWorkspace() and workspace.GetValue(keys[1]) ~= "" then
+		if workspace.HasWorkspace() and workspace.GetValue(startupSign, key) ~= "" then
 			local input = vim.fn.input("use default last config:")
 			if input == "" or input:sub(0) ~= 'n' then
 				needCB = false
@@ -113,18 +113,20 @@ function WorkspaceConfig(key, cb)
 	else
 		needCB = CheckUseDefault.UseDefault
 	end
+
 	if needCB then
 		local val = cb()
-		workspace.OverwriteFile(key, val)
+		workspace.OverwriteFile(startupSign, key, val)
 		return val, needCB
 	end
 
-	return workspace.GetValue(key), needCB
+	return workspace.GetValue(startupSign, key), needCB
 end
 
-function GetArgsByWorkspace(key)
+function GetArgsByWorkspace(startupSign)
+	startupSign = startupSign .. GetStartupName()
 	CheckUseDefault.NeedCheck = true
-	local args, NeedCB = WorkspaceConfig(key .. ".args", function()
+	local args, NeedCB = WorkspaceConfig(startupSign, "args", function()
 		return vim.fn.input('Arguments: ')
 	end)
 	CheckUseDefault.NeedCheck = false
@@ -132,8 +134,21 @@ function GetArgsByWorkspace(key)
 	return vim.split(args, " +")
 end
 
-function GetExecFileName()
-	return util.GetWorkAbsPath() .. "/" .. util.GetFileName()
+function GetEnvByWorkspace(startupSign)
+	startupSign = startupSign .. GetStartupName()
+	local envs = workspace.GetValue(startupSign, "env")
+	if type(envs) == "table" then
+		local e = {}
+		for _, v in ipairs(envs) do
+			e[v["Name"]] = v["Value"]
+		end
+		return e
+	end
+	return nil
+end
+
+function GetStartupName()
+	return "(" .. util.GetWorkAbsPath() .. "/" .. util.GetFileName() .. ")"
 end
 
 dap.configurations.go = {
@@ -142,14 +157,20 @@ dap.configurations.go = {
 		name = 'Debug',
 		request = 'launch',
 		program = "${file}",
+		env = function()
+			return GetEnvByWorkspace('Debug')
+		end
 	},
 	{
 		type = 'go',
 		name = 'Debug-args',
 		request = 'launch',
 		program = "${file}",
+		env = function()
+			return GetEnvByWorkspace('Debug-args')
+		end,
 		args = function()
-			return GetArgsByWorkspace('Debug-args-' .. GetExecFileName())
+			return GetArgsByWorkspace('Debug-args')
 		end,
 	},
 	{
@@ -158,6 +179,9 @@ dap.configurations.go = {
 		request = 'launch',
 		mode = "debug",
 		outputMode = 'remote',
+		env = function()
+			return GetEnvByWorkspace('local-docker')
+		end,
 		program = function()
 			local fileName = util.GetFileName()
 			local workPath = gohelp.GetModuleModDir(fileName)
@@ -190,6 +214,9 @@ dap.configurations.go = {
 		name = 'remote-default',
 		request = 'launch',
 		mode = "debug",
+		env = function()
+			return GetEnvByWorkspace('remote-default')
+		end,
 		args = function()
 			return GetArgsByWorkspace("remote-default")
 		end,
@@ -215,6 +242,9 @@ dap.configurations.go = {
 		args = function()
 			return GetArgsByWorkspace("remote")
 		end,
+		env = function()
+			return GetEnvByWorkspace('remote')
+		end,
 		program = function()
 			local config = WorkspaceConfig('remote.program', function()
 				return vim.fn.input('program: ')
@@ -234,35 +264,6 @@ dap.configurations.go = {
 				return config
 			end,
 		},
-	},
-	{
-		type = 'delve-docker',
-		name = 'remote-wip',
-		request = 'launch',
-		mode = "debug",
-		outputMode = 'remote',
-		substitutePath = {
-			function()
-				util.GetWorkAbsPath()
-			end,
-		},
-		args = function()
-			local args_string = vim.fn.input('Arguments: ')
-			return util.splitArgs(args_string)
-		end
-	},
-
-	{
-		type = 'delve',
-		name = 'remote-test',
-		request = 'launch',
-		mode = "debug",
-		showLog = true,
-		program = "${file}",
-		outputMode = 'remote',
-		args = function()
-			return GetArgsByWorkspace("remote-test-" .. GetExecFileName())
-		end,
 	},
 }
 
@@ -296,6 +297,9 @@ dap.adapters.docker = function(cb, config)
 		type = 'server',
 		host = '0.0.0.0',
 		port = port,
+		options = {
+			max_retries = 30,
+		}
 	})
 end
 
