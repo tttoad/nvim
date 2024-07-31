@@ -1,49 +1,37 @@
 local _M = {}
+local gohelp = require('base.go_help')
 local log = require('base.log')
-local json = require('json')
-local util = require("base.util")
 require "json.json-beautify"
 
-local workProjectFile = '.nvim_workproject_start.json'
+local workProjectFile = '.nvim_workproject_start.yaml'
 
 --- Get val of key in the workProject file
 ---@param key string
 ---@return string or empty string
-function _M.GetValue(key)
-	local file = io.open(workProjectFile, "r")
-	if file == nil then
-		log.warn(workProjectFile .. "not found")
-		return ""
+function _M.GetValue(sign, key)
+	local data = gohelp.GetStartupConfig(workProjectFile, sign)
+	if data ~= nil then
+		return data[key]
 	end
-
-	local content = file:read("*all")
-	file:close()
-	-- Todo use yaml
-	return util.GetValTable(json.decode(content), key)
+	return ""
+	-- local file = io.open(workProjectFile, "r")
+	-- if file == nil then
+	-- 	log.warn(workProjectFile .. "not found")
+	-- 	return ""
+	-- end
+	--
+	-- local content = file:read("*all")
+	-- file:close()
+	-- -- Todo use yaml
+	-- return util.GetValTable(json.decode(content), key)
 end
 
 --- Overwrite the data of the keys in the workProject file
 ---@param key string
 ---@param val string
-function _M.OverwriteFile(key, val)
-	local old = {}
-	local file = io.open(workProjectFile, "r")
-	if file ~= nil then
-		local content = file:read("*all")
-		if content ~= "" then
-			old = json.decode(content)
-		end
-	end
-
-	util.InsertTable(old, key, val)
-	file = io.open(workProjectFile, "w")
-	if file == nil then
-		log.warn("failed to write file,unable to create file")
-		return ""
-	end
-
-	file:write(json.beautify(old))
-	file:close()
+function _M.OverwriteFile(sign, key, val)
+	-- TODO support for modifying other fields
+	gohelp.ModifyStartupConfig(workProjectFile, sign, val)
 end
 
 --- Verify that the configuration file exists
