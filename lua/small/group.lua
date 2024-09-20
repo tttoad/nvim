@@ -41,8 +41,12 @@ util.setVimCommand({
 	"let g:floaterm_autoclose=v:true"
 })
 
-util.keymap("","<leader>fa","<cmd>FloatermNew --width=0.8 --height=0.8 <CR>")
-util.keymap("","<leader>lg","<cmd>FloatermNew --width=3000 --height=3000 lazygit<CR>")
+util.keymap("", "<leader>fa", "<cmd>FloatermNew --width=0.8 --height=0.8 <CR>")
+util.keymap("", "<leader>lg", "<cmd>FloatermNew --width=3000 --height=3000 lazygit<CR>")
+util.keymap("", "<c-q>", function()
+	util.cmd("FloatermKill !")
+	util.cmd("wqa")
+end)
 
 -- nvim-autopairs
 require("nvim-autopairs").setup({
@@ -68,7 +72,8 @@ require('Comment').setup({
 		line = '<leader>/',
 		---Block-comment toggle keymap
 		block = '<leader>.',
-	}, opleader = {
+	},
+	opleader = {
 		---Line-comment keymap
 		line = '<leader>/',
 		---Block-comment keymap

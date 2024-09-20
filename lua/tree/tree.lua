@@ -36,7 +36,6 @@ local function my_on_attach(bufnr)
 		vim.cmd("+1")
 	end
 	-- custom mappings
-	vim.keymap.set('n', 'u', api.tree.change_root_to_parent, opts("Up"))
 	vim.keymap.set('n', 's', api.node.open.horizontal, opts("Open: Horizontal Split"))
 	vim.keymap.set('n', '<space>', marksTaggle, opts("Toggle Bookmark"))
 	vim.keymap.set('n', 'm', ":+10 <cr>", opts("Next 10 rows"))

@@ -14,16 +14,6 @@ function _M.GetValue(sign, key)
 		return data[key]
 	end
 	return ""
-	-- local file = io.open(workProjectFile, "r")
-	-- if file == nil then
-	-- 	log.warn(workProjectFile .. "not found")
-	-- 	return ""
-	-- end
-	--
-	-- local content = file:read("*all")
-	-- file:close()
-	-- -- Todo use yaml
-	-- return util.GetValTable(json.decode(content), key)
 end
 
 --- Overwrite the data of the keys in the workProject file
