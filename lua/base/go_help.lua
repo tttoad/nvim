@@ -51,7 +51,6 @@ end
 
 function _M.ExecHelp(action, args)
 	local res = io.popen('nvimhelp ' .. action .. ' ' .. args)
-	log.err('nvimhelp ' .. action .. ' ' .. args)
 	if res ~= nil then
 		local rea = res:read("*a")
 		local resJson = json.decode(rea)

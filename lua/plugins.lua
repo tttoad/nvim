@@ -1,5 +1,4 @@
 local log = require("base.log")
-local gohelp = require("base.go_help")
 require('packer').startup(function()
 	use 'wbthomason/packer.nvim'
 	use "morhetz/gruvbox"
@@ -57,6 +56,7 @@ require("tree.tree")
 require("base.keymap")
 require("lsp.lsp")
 require("lsp.dap")
+require("lsp.ultest")
 require("small.group")
 require("docker.docker")
 
@@ -178,105 +178,6 @@ util.keymap('n', '<leader>fh', '<cmd>Telescope help_tags<CR>')
 util.keymap('n', '<leader>fz', '<cmd>Telescope grep_string search= <CR>')
 -- nnoremap <leader>fb <cmd>Telescope buffers<cr>
 -- nnoremap <leader>fh <cmd>Telescope help_tags<cr>
-
--- nvim-test
-util.keymap("n", "<leader>tr", "<cmd>UltestSummary<cr>")
-util.keymap("n", "<leader>td", "<cmd>UltestDebug<cr>")
-util.cmd("let g:ultest_deprecation_notice = 0")
-
-local ultest = require 'ultest'
-
-ultest.setup({
-	builders = {
-		["go#gotest"] = function(cmds)
-			local args = {}
-			for i = 3, #cmds - 1, 1 do
-				local arg = args[i]
-				if vim.startswith(arg, "-") then
-					arg = "-test." .. string.sub(arg, 2)
-				end
-				args[#args + 1] = arg
-			end
-
-			local mode = vim.fn.inputlist({
-				'Select the debugging mode for unit tests:',
-				'(1):local mode.',
-				'(2):remote mode.',
-				'(3):others use local mode.'
-			})
-
-			if (mode ~= 2) then
-				vim.cmd("redraw")
-				mode = vim.fn.inputlist({
-					'Select the debugging mode for unit tests:',
-					'(1):single function.',
-					'(2):single file.',
-					'(3):dir.'
-				})
-
-				local program = ""
-				if (mode == 2) then
-					program = "${file}"
-				elseif (mode == 3) then
-					program = "${fileDirname}"
-					args[#args + 1] = "-test.v"
-				else
-					program = "${fileDirname}"
-					local fn = vim.fn.expand('<cword>')
-					local isBench = string.find(fn, "Benchmark")
-					args[#args + 1] = "-test.run"
-					args[#args + 1] = fn
-
-					if (isBench ~= nil) then
-						args[#args + 1] = "-test.bench"
-						args[#args + 1] = fn
-						args[#args + 1] = "-test.benchmem"
-					end
-				end
-
-				return {
-					dap = {
-						type = 'go',
-						name = 'Debug test',
-						request = 'launch',
-						mode = 'test',
-						showLog = true,
-						program = program,
-						args = args,
-						dlvCwd = gohelp.GetModuleModDir(util.GetFileName()),
-					},
-					parse_result = function(lines)
-						return lines[#lines] == "FAIL" and 1 or 0
-					end
-				}
-			else
-				return {
-					dap = {
-						type = 'delve',
-						name = 'Debug test',
-						request = 'launch',
-						mode = 'test',
-						showLog = false,
-						program = function()
-							return vim.fn.input('Program: ')
-						end,
-						outputMode = 'remote',
-						substitutePath = {
-							{
-								from = "/Users/toad/work",
-								to = "/root",
-							}
-						},
-						args = args,
-					},
-					parse_result = function(lines)
-						return lines[#lines] == "FAIL" and 1 or 0
-					end
-				}
-			end
-		end
-	}
-})
 
 -- sniprun
 util.keymap("", "<leader>rr", "<cmd>SnipRun<CR>")

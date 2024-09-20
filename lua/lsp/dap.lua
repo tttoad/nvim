@@ -4,15 +4,23 @@ local gohelp = require("base.go_help")
 local packer = require('packer')
 local workspace = require('lsp.workspace')
 local json = require "json.json-beautify"
+local dap = require('dap')
 
+local DefaultNvimTreeSize = "40"
 packer.use('ravenxrz/DAPInstall.nvim')
 packer.use('mfussenegger/nvim-dap')
 
-local dap = require('dap')
+local HasActiveContainer = false
+
 function CloseDebug()
 	require 'dap'.close()
 	require 'dapui'.close({})
 	require 'nvim-dap-virtual-text'.disable()
+
+	if HasActiveContainer then
+		HasActiveContainer = false
+		gohelp.RemoveDebugDocker(gohelp.GetModuleModDir(util.GetFileName()))
+	end
 end
 
 local debugWindowsAll = {
@@ -76,6 +84,7 @@ function TaggleDebugWindows()
 		require 'dapui'.setup(debugWindowsOnlyConsole)
 		require 'dapui'.toggle({ reset = true })
 		debugWindows = "terminal"
+		util.cmd("NvimTreeResize " .. DefaultNvimTreeSize)
 	end
 end
 
@@ -151,6 +160,7 @@ function GetStartupName()
 	return "(" .. util.GetWorkAbsPath() .. "/" .. util.GetFileName() .. ")"
 end
 
+
 dap.configurations.go = {
 	{
 		type = 'go',
@@ -189,9 +199,8 @@ dap.configurations.go = {
 		end,
 		substitutePath = {
 			function()
-				local workPath = gohelp.GetModuleModDir(util.GetFileName())
 				return {
-					from = util.GetDirByPath(workPath),
+					from = util.GetDirByPath(gohelp.GetModuleModDir(util.GetFileName())),
 					to = "/root",
 				}
 			end,
@@ -291,8 +300,8 @@ dap.adapters.delve = function(cb)
 end
 
 dap.adapters.docker = function(cb, config)
-	local workPath = gohelp.GetModuleModDir(util.GetFileName())
-	local port = gohelp.StartDebugDocker(workPath)
+	local port = gohelp.StartDebugDocker(gohelp.GetModuleModDir(util.GetFileName()))
+	HasActiveContainer = true
 	cb({
 		type = 'server',
 		host = '0.0.0.0',
@@ -349,13 +358,13 @@ end
 
 dap.listeners.after.event_terminated["dapui_config"] = function()
 	util.cmd("DapVirtualTextDisable")
-	util.cmd("NvimTreeResize 40")
+	util.cmd("NvimTreeResize " .. DefaultNvimTreeSize)
 end
 
 dap.listeners.after.event_exited["dapui_config"] = function()
 	dapui.close({})
 	util.cmd("DapVirtualTextDisable")
-	util.cmd("NvimTreeResize 40")
+	util.cmd("NvimTreeResize " .. DefaultNvimTreeSize)
 end
 
 -- lua
