@@ -30,8 +30,6 @@ util.setVimKeyMap({
 	'imap <c-G> <esc>GG',
 	'imap <c-s> <esc>:w<cr>',
 	'nmap <c-s> :w<cr>',
-	'nmap <c-q> :wqa<cr>',
-	'imap <c-q> :wqa<cr>',
 	'nmap L $',
 	'nmap H ^',
 	-- 'noremap <c-w> <c-w>w',

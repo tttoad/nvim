@@ -33,14 +33,12 @@ ultest.setup({
 				'(3):dir.'
 			})
 
-			local program = ""
+			local program = util.GetDirByPath(util.GetFilePath())
 			if (mode == 2) then
 				program = util.GetFileName()
 			elseif (mode == 3) then
-				program = util.GetFilePath()
 				args[#args + 1] = "-test.v"
 			else
-				program = util.GetFilePath()
 				local fn = vim.fn.expand('<cword>')
 				local isBench = string.find(fn, "Benchmark")
 				args[#args + 1] = "-test.run"
@@ -52,7 +50,6 @@ ultest.setup({
 					args[#args + 1] = "-test.benchmem"
 				end
 			end
-
 
 			vim.cmd("redraw")
 			mode = vim.fn.inputlist({
