@@ -103,44 +103,8 @@ util.keymap("n", "<leader>re", function() require 'dap'.repl.toggle() end)
 util.keymap("n", "<leader>du", function() require 'dapui'.open({ reset = true }) end)
 util.keymap("n", "<leader>da", function() TaggleDebugWindows() end)
 
--- dap.set_log_level('TRACE')
-
-CheckUseDefault = {
-	NeedCheck = true,
-	UseDefault = false
-}
-
-function WorkspaceConfig(startupSign, key, cb)
-	local needCB = true
-	if CheckUseDefault.NeedCheck then
-		if workspace.HasWorkspace() and workspace.GetValue(startupSign, key) ~= "" then
-			local input = vim.fn.input("use default last config:")
-			if input == "" or input:sub(0) ~= 'n' then
-				needCB = false
-			end
-		end
-	else
-		needCB = CheckUseDefault.UseDefault
-	end
-
-	if needCB then
-		local val = cb()
-		workspace.OverwriteFile(startupSign, key, val)
-		return val, needCB
-	end
-
-	return workspace.GetValue(startupSign, key), needCB
-end
-
 function GetArgsByWorkspace(startupSign)
-	startupSign = startupSign .. GetStartupName()
-	CheckUseDefault.NeedCheck = true
-	local args, NeedCB = WorkspaceConfig(startupSign, "args", function()
-		return vim.fn.input('Arguments: ')
-	end)
-	CheckUseDefault.NeedCheck = false
-	CheckUseDefault.UseDefault = NeedCB
-	return vim.split(args, " +")
+	return vim.split(workspace.GetValue(startupSign .. GetStartupName(), "args"), " +")
 end
 
 function GetEnvByWorkspace(startupSign)
@@ -159,7 +123,6 @@ end
 function GetStartupName()
 	return "(" .. util.GetWorkAbsPath() .. "/" .. util.GetFileName() .. ")"
 end
-
 
 dap.configurations.go = {
 	{
@@ -230,12 +193,27 @@ dap.configurations.go = {
 			return GetArgsByWorkspace("remote-default")
 		end,
 		program = function()
-			local config = WorkspaceConfig('remote-default.program', function()
-				return vim.fn.input('program: ')
-			end)
-			return config
+			-- local config = WorkspaceConfig('remote-default.program', function()
+			return vim.fn.input('program: ')
+			-- end)
+			-- return config
 		end,
 		outputMode = 'remote',
+		substitutePath = {
+			{
+				from = "/Users/toad/work",
+				to = "/root",
+			}
+		}
+	},
+	{
+		type = 'delve',
+		name = 'attach-remote',
+		request = 'attach',
+		mode = "local",
+		processId = function()
+			return tonumber(vim.fn.input('PID: '))
+		end,
 		substitutePath = {
 			{
 				from = "/Users/toad/work",
@@ -255,47 +233,42 @@ dap.configurations.go = {
 			return GetEnvByWorkspace('remote')
 		end,
 		program = function()
-			local config = WorkspaceConfig('remote.program', function()
-				return vim.fn.input('program: ')
-			end)
-			return config
+			return vim.fn.input('program: ')
 		end,
 		outputMode = 'remote',
 		substitutePath = {
 			function()
-				local config = WorkspaceConfig('remote.substitutePath', function()
-					local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
-					return {
-						from = from_to[1],
-						to = from_to[2],
-					}
-				end)
-				return config
+				-- local config = WorkspaceConfig('remote.substitutePath', function()
+				local from_to = vim.split(vim.fn.input('localWorkspace/remoteWorkspace:'), " +")
+				return {
+					from = from_to[1],
+					to = from_to[2],
+				}
+				-- end)
+				-- return config
 			end,
 		},
 	},
 }
 
 dap.adapters.delve = function(cb)
-	local sc = WorkspaceConfig('delve', function()
-		local host = vim.fn.input('host:')
-		local port = vim.fn.input('port:')
-		if (host == "") then
-			host = "0.0.0.0"
-		end
+	-- TODO use workspaceConfig
+	local host = vim.fn.input('host:')
+	local port = vim.fn.input('port:')
+	if (host == "") then
+		host = "0.0.0.0"
+	end
 
-		if (port == "") then
-			port = "38697"
-		end
-		return {
-			host = host,
-			port = port,
-		}
-	end)
+	if (port == "") then
+		port = "38697"
+	end
 	cb({
 		type = 'server',
-		host = sc["host"],
-		port = sc["port"],
+		host = host,
+		port = port,
+		options = {
+			max_retries = 30,
+		}
 	})
 end
 

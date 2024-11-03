@@ -13,7 +13,7 @@ function _M.GetValue(sign, key)
 	if data ~= nil then
 		return data[key]
 	end
-	return ""
+	return nil
 end
 
 --- Overwrite the data of the keys in the workProject file

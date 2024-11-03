@@ -1,7 +1,7 @@
 local util = require("base.util")
 local packer = require('packer')
 
--- vim-go
+-- vim-go todo only use gopls
 packer.use('fatih/vim-go')
 
 function GoAddTagsPlugin()
@@ -28,10 +28,7 @@ function GoAddTagsPlugin()
 end
 
 util.keymap('', "<F1>", ":GoDocBrowser<CR>")
-util.keymap('n', "<leader><space>i", ":GoImpl ")
 util.keymap('n', "<leader>fill", ":GoFillStruct<CR>")
-util.keymap('n', "<leader>f", ":GoReferrers<CR>")
-util.keymap('n', "<leader>c", ":GoCallees<CR>")
 util.keymap('n', "<leader>tg", ":lua require'lsp.lsp'GoAddTagsPlugin()<CR>")
 
 vim.g.go_def_mapping_enabled = 0
