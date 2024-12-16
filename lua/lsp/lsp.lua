@@ -1,10 +1,14 @@
 local util = require("base.util")
 local packer = require('packer')
+local gohelp = require("base.go_help")
+local log = require('base.log')
 
 -- vim-go todo only use gopls
-packer.use('fatih/vim-go')
-
+-- packer.use('fatih/vim-go')
+--
 function GoAddTagsPlugin()
+	local linenr = vim.api.nvim_win_get_cursor(0)[1]
+	local source = vim.api.nvim_buf_get_lines(0, linenr - 1, linenr, false)[1]
 	local flags = vim.fn.inputlist({
 		'Select the debugging mode for tags:',
 		'(1):json.',
@@ -13,23 +17,27 @@ function GoAddTagsPlugin()
 		'(4):yaml.',
 		'(5):custom.',
 	})
+	local tag = ""
 	if (flags == 2) then
-		util.cmd("GoAddTags gorm")
+		tag = "gorm"
 	elseif (flags == 3) then
-		util.cmd("GoAddTags schema,required")
+		tag = "schema"
 	elseif (flags == 4) then
-		util.cmd("GoAddTags yaml")
+		tag = "yaml"
 	elseif (flags == 5) then
-		local args = vim.fn.input("args:")
-		util.cmd("GoAddTags " .. args)
+		tag = vim.fn.input("args:")
 	else
-		util.cmd("GoAddTags")
+		tag = "json"
 	end
+
+	source = string.gsub(string.gsub(source, "\"", "\\\""), "`", "\\`")
+	vim.api.nvim_buf_set_lines(0, linenr - 1, linenr, false, { gohelp.AddTags(source, tag) })
 end
 
-util.keymap('', "<F1>", ":GoDocBrowser<CR>")
-util.keymap('n', "<leader>fill", ":GoFillStruct<CR>")
-util.keymap('n', "<leader>tg", ":lua require'lsp.lsp'GoAddTagsPlugin()<CR>")
+-- util.keymap('', "<F1>", ":GoDocBrowser<CR>")
+-- util.keymap('n', "<leader>fill", ":GoFillStruct<CR>")
+util.keymap('n', "<leader>tg", GoAddTagsPlugin)
+-- util.keymap('v', "<leader>tg", ": luado return require'lsp.lsp'.GoAddTagsPlugin(line,linenr)<CR>")
 
 vim.g.go_def_mapping_enabled = 0
 --
@@ -55,6 +63,8 @@ packer.use('neovim/nvim-lspconfig')
 
 
 --lsp
+--lua print(vim.lsp.get_log_path())
+-- vim.lsp.set_log_level("debug")
 require("cmp_nvim_ultisnips").setup {}
 
 local cmp = require('cmp')
@@ -208,7 +218,7 @@ require 'lspconfig'.lua_ls.setup {
 	end
 }
 -- typescript
-require 'lspconfig'.tsserver.setup {}
+require 'lspconfig'.ts_ls.setup {}
 
 --
 -- jsonnet
@@ -266,7 +276,7 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
 vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
 vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
 vim.keymap.set('n', '<C-]>', vim.lsp.buf.definition, bufopts)
-vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
+-- vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
 vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
 vim.keymap.set('n', '<C-;>', vim.lsp.buf.signature_help, bufopts)
 -- vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
@@ -277,12 +287,12 @@ vim.keymap.set('n', '<C-;>', vim.lsp.buf.signature_help, bufopts)
 vim.keymap.set('', '<C-C>', vim.lsp.buf.completion, bufopts)
 vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
 vim.keymap.set('', '<leader>rn', vim.lsp.buf.rename, bufopts)
-vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
+-- vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
 vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
 vim.keymap.set('', '<C-R>', function()
 	vim.lsp.buf.format { async = true }
 end, bufopts)
-vim.keymap.set('n', "gh", vim.lsp.buf.code_action, bufopts)
+vim.keymap.set('', "gh", vim.lsp.buf.code_action, bufopts)
 --
 -- Set configuration for specific filetype.
 cmp.setup.filetype('gitcommit', {
@@ -292,15 +302,14 @@ cmp.setup.filetype('gitcommit', {
 		{ name = 'buffer' },
 	})
 })
---
--- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline('/', {
+-- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+cmp.setup.cmdline({ '/', '?' }, {
 	mapping = cmp.mapping.preset.cmdline(),
 	sources = {
 		{ name = 'buffer' }
 	}
 })
---
+
 -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
 cmp.setup.cmdline(':', {
 	mapping = cmp.mapping.preset.cmdline(),
@@ -308,5 +317,24 @@ cmp.setup.cmdline(':', {
 		{ name = 'path' }
 	}, {
 		{ name = 'cmdline' }
-	})
+	}),
+	matching = { disallow_symbol_nonprefix_matching = false }
 })
+
+packer.use('nanotee/sqls.nvim')
+
+require 'lspconfig'.sqls.setup {
+	on_attach = function(client, bufnr)
+		require('sqls').on_attach(client, bufnr) -- require sqls.nvim
+	end,
+	settings = {
+		sqls = {
+			connections = {
+				{
+					driver = 'mysql',
+					dataSourceName = 'root:123456@tcp(127.0.0.1:3306)/opamp',
+				}
+			},
+		},
+	},
+}

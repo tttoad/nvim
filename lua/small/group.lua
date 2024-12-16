@@ -9,7 +9,11 @@ packer.use('kevinhwang91/nvim-bqf')
 packer.use('voldikss/vim-floaterm')
 packer.use("windwp/nvim-autopairs")
 packer.use('voldikss/vim-translator')
-packer.use('preservim/tagbar')
+packer.use({
+	'crusj/structrue-go.nvim',
+	branch = "main"
+})
+-- packer.use('preservim/tagbar')
 
 -- onedark
 require('onedark').setup {
@@ -82,4 +86,19 @@ require('Comment').setup({
 })
 
 -- tagbar
-util.keymap('', "<F3>", "<cmd> TagbarToggle<CR>")
+-- util.keymap('', "<F3>", "<cmd> TagbarToggle<CR>")
+
+-- gotags
+require"structrue-go".setup({
+	keymap = {
+		toggle = "<F3>", -- toggle structure-go window
+		show_others_method_toggle = "H", -- show or hidden the methods of struct whose not in current file
+		symbol_jump = "<CR>", -- jump to then symbol file under cursor
+		center_symbol = "\\f", -- Center the highlighted symbol
+		fold_toggle = "\\z",
+		refresh = "R", -- refresh symbols
+		preview_open = "P", -- preview  symbol context open
+		preview_close = "\\p" -- preview  symbol context close
+	}
+}
+)

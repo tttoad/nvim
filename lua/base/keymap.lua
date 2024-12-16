@@ -81,3 +81,9 @@ util.setVimCommand({
 util.keymap("v", "<leader>tt", ": luado return require'base.util'.FormatVar(line,linenr)<CR>")
 util.keymap("n", "<leader>tt", "V: luado return require'base.util'.FormatVar(line,linenr)<CR>")
 util.keymap("n", "<leader>t{", "vi{: luado return require'base.util'.FormatVar(line,linenr)<CR>")
+
+util.keymap("", "<C-9>", ":NvimTreeResize -10<CR>")
+util.keymap("", "<C-0>", ":NvimTreeResize +10<CR>")
+util.keymap("", "<C-[", ":res +10<CR>")
+
+util.keymap("","<leader>uu",":bufdo norm u<CR>")

@@ -40,6 +40,14 @@ function _M.GetStartupConfig(filePath, startup)
 	return {}
 end
 
+function _M.AddTags(source, tag)
+	local ok, data = _M.ExecHelp("add-tags", "\"-s=" .. source .. "\" " .. "-t=" .. tag)
+	if ok then
+		return data
+	end
+	log.err(data)
+end
+
 function _M.ModifyStartupConfig(filePath, startup, val)
 	local ok, data = _M.ExecHelp("yaml-edit",
 		"modify  -f=\"" .. filePath .. "\" -p=\"" .. startup .. "\" -args=\"" .. val .. "\"")

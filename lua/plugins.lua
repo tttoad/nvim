@@ -52,12 +52,12 @@ end)
 local util = require("base.util")
 
 -- load plugin
+require("small.group")
 require("tree.tree")
 require("base.keymap")
 require("lsp.lsp")
 require("lsp.dap")
 require("lsp.ultest")
-require("small.group")
 require("docker.docker")
 
 -- nvim-treesitter
