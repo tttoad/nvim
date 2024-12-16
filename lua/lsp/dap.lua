@@ -1,13 +1,10 @@
 local util = require("base.util")
 local gohelp = require("base.go_help")
-local packer = require('packer')
 local workspace = require('lsp.workspace')
 local log = require('base.log')
 local dap = require('dap')
 
 local DefaultNvimTreeSize = "40"
-packer.use('ravenxrz/DAPInstall.nvim')
-packer.use('mfussenegger/nvim-dap')
 
 local HasActiveContainer = false
 
@@ -293,7 +290,6 @@ dap.adapters.go = {
 	}
 }
 
-packer.use('theHamsta/nvim-dap-virtual-text')
 -- nvim-dap-virtual-text
 -- require("nvim-dap-virtual-text").setup {
 -- 	enabled = false, -- enable this plugin (the default)
@@ -331,11 +327,6 @@ packer.use('theHamsta/nvim-dap-virtual-text')
 -- }
 
 -- dap-ui
-packer.use({
-	"rcarriga/nvim-dap-ui",
-	tag = 'v2.6.0', -- https://github.com/rcarriga/nvim-dap-ui/issues/371
-	requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" }
-})
 util.keymap('n', "<leader>k", function() require 'dapui'.eval() end)
 
 local dapui = require("dapui")
@@ -363,7 +354,6 @@ dap.listeners.after.event_exited["dapui_config"] = function()
 end
 
 -- lua
-packer.use("jbyuki/one-small-step-for-vimkind")
 dap.configurations.lua = {
 	{
 		type = 'nlua',

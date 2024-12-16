@@ -1,5 +1,4 @@
 local util = require("base.util")
-local packer = require('packer')
 local gohelp = require("base.go_help")
 local log = require('base.log')
 
@@ -41,26 +40,6 @@ util.keymap('n', "<leader>tg", GoAddTagsPlugin)
 
 vim.g.go_def_mapping_enabled = 0
 --
-packer.use({
-	'SirVer/ultisnips',
-	requires = 'honza/vim-snippets',
-	config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end,
-})
-
-packer.use({
-	'quangnguyen30192/cmp-nvim-ultisnips',
-	config = function()
-		vim.g.UltiSnipsRemoveSelectModeMappings = 0
-	end,
-})
-
-packer.use('hrsh7th/cmp-nvim-lsp')
-packer.use('hrsh7th/cmp-buffer')
-packer.use('hrsh7th/cmp-path')
-packer.use('hrsh7th/cmp-cmdline')
-packer.use('hrsh7th/nvim-cmp')
-packer.use('neovim/nvim-lspconfig')
-
 
 --lsp
 --lua print(vim.lsp.get_log_path())
@@ -320,8 +299,6 @@ cmp.setup.cmdline(':', {
 	}),
 	matching = { disallow_symbol_nonprefix_matching = false }
 })
-
-packer.use('nanotee/sqls.nvim')
 
 require 'lspconfig'.sqls.setup {
 	on_attach = function(client, bufnr)

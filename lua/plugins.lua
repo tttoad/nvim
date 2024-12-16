@@ -48,6 +48,63 @@ require('packer').startup(function()
 	vim.opt.completeopt = { "menu", "menuone", "noselect" }
 end)
 
+local packer = require('packer')
+packer.use({
+	'kyazdani42/nvim-tree.lua',
+	requires = {
+		'kyazdani42/nvim-web-devicons', -- optional, for file icons
+	},
+})
+
+packer.use({
+	'SirVer/ultisnips',
+	requires = 'honza/vim-snippets',
+	config = function() vim.g.UltiSnipsRemoveSelectModeMappings = 0 end,
+})
+
+packer.use({
+	'quangnguyen30192/cmp-nvim-ultisnips',
+	config = function()
+		vim.g.UltiSnipsRemoveSelectModeMappings = 0
+	end,
+})
+
+packer.use('nanotee/sqls.nvim')
+packer.use('hrsh7th/cmp-nvim-lsp')
+packer.use('hrsh7th/cmp-buffer')
+packer.use('hrsh7th/cmp-path')
+packer.use('hrsh7th/cmp-cmdline')
+packer.use('hrsh7th/nvim-cmp')
+packer.use('neovim/nvim-lspconfig')
+packer.use('theHamsta/nvim-dap-virtual-text')
+packer.use("jbyuki/one-small-step-for-vimkind")
+packer.use({
+	"rcarriga/nvim-dap-ui",
+	tag = 'v2.6.0', -- https://github.com/rcarriga/nvim-dap-ui/issues/371
+	requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" }
+})
+
+
+packer.use('ravenxrz/DAPInstall.nvim')
+packer.use('mfussenegger/nvim-dap')
+
+packer.use('navarasu/onedark.nvim')
+packer.use('numToStr/Comment.nvim')
+packer.use({
+	'nvim-lualine/lualine.nvim',
+	requires = { 'kyazdani42/nvim-web-devicons', opt = true }
+})
+packer.use('kevinhwang91/nvim-bqf')
+packer.use('voldikss/vim-floaterm')
+packer.use("windwp/nvim-autopairs")
+packer.use('voldikss/vim-translator')
+packer.use({
+	'crusj/structrue-go.nvim',
+	branch = "main"
+})
+-- packer.use('preservim/tagbar')
+
+
 
 local util = require("base.util")
 

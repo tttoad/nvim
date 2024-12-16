@@ -1,20 +1,3 @@
-local packer = require('packer')
-packer.use('navarasu/onedark.nvim')
-packer.use('numToStr/Comment.nvim')
-packer.use({
-	'nvim-lualine/lualine.nvim',
-	requires = { 'kyazdani42/nvim-web-devicons', opt = true }
-})
-packer.use('kevinhwang91/nvim-bqf')
-packer.use('voldikss/vim-floaterm')
-packer.use("windwp/nvim-autopairs")
-packer.use('voldikss/vim-translator')
-packer.use({
-	'crusj/structrue-go.nvim',
-	branch = "main"
-})
--- packer.use('preservim/tagbar')
-
 -- onedark
 require('onedark').setup {
 	style = 'cool'
