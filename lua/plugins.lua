@@ -84,9 +84,13 @@ packer.use({
 	requires = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" }
 })
 
-
 packer.use('ravenxrz/DAPInstall.nvim')
-packer.use('mfussenegger/nvim-dap')
+packer.use({
+	'mfussenegger/nvim-dap',
+	tag = '0.9.0'
+})
+packer.use('windwp/nvim-ts-autotag')
+
 
 packer.use('navarasu/onedark.nvim')
 packer.use('numToStr/Comment.nvim')
@@ -104,16 +108,14 @@ packer.use({
 })
 -- packer.use('preservim/tagbar')
 
-
-
 local util = require("base.util")
 
 -- load plugin
 require("small.group")
+require("lsp.dap")
 require("tree.tree")
 require("base.keymap")
 require("lsp.lsp")
-require("lsp.dap")
 require("lsp.ultest")
 require("docker.docker")
 
@@ -217,7 +219,7 @@ local telescope = require('telescope')
 telescope.setup {
 	extensions = {
 		fzf = {
-			fuzzy = true, -- false will only do exact matching
+			fuzzy = true,          -- false will only do exact matching
 			override_generic_sorter = true, -- override the generic sorter
 			override_file_sorter = true, -- override the file sorter
 			case_mode = "smart_case", -- or "ignore_case" or "respect_case"
@@ -240,9 +242,9 @@ util.keymap('n', '<leader>fz', '<cmd>Telescope grep_string search= <CR>')
 util.keymap("", "<leader>rr", "<cmd>SnipRun<CR>")
 require 'sniprun'.setup({
 	selected_interpreters = {}, --# use those instead of the default for the current filetype
-	repl_enable = {}, --# enable REPL-like behavior for the given interpreters
-	repl_disable = {}, --# disable REPL-like behavior for the given interpreters
-	interpreter_options = { --# interpreter-specific options, see docs / :SnipInfo <name>
+	repl_enable = {},        --# enable REPL-like behavior for the given interpreters
+	repl_disable = {},       --# disable REPL-like behavior for the given interpreters
+	interpreter_options = {  --# interpreter-specific options, see docs / :SnipInfo <name>
 
 		--# use the interpreter name as key
 		GFM_original = {
@@ -289,7 +291,7 @@ require 'sniprun'.setup({
 	inline_messages = 0, --# inline_message (0/1) is a one-line way to display messages
 	--# to workaround sniprun not being able to display anything
 
-	borders = 'single', --# display borders around floating windows
+	borders = 'single',   --# display borders around floating windows
 	--# possible values are 'none', 'single', 'double', or 'shadow'
 	live_mode_toggle = 'off' --# live mode toggle, see Usage - Running for more info
 })

@@ -30,6 +30,7 @@ util.setVimKeyMap({
 	'imap <c-G> <esc>GG',
 	'imap <c-s> <esc>:w<cr>',
 	'nmap <c-s> :w<cr>',
+	'nmap <leader>q :q<cr>',
 	'nmap L $',
 	'nmap H ^',
 	-- 'noremap <c-w> <c-w>w',
@@ -84,6 +85,7 @@ util.keymap("n", "<leader>t{", "vi{: luado return require'base.util'.FormatVar(l
 
 util.keymap("", "<C-9>", ":NvimTreeResize -10<CR>")
 util.keymap("", "<C-0>", ":NvimTreeResize +10<CR>")
-util.keymap("", "<C-[", ":res +10<CR>")
+util.keymap("", "<C-p>", ":res +10<CR>")
+util.keymap("", "<C-]>", ":res -10<CR>")
 
-util.keymap("","<leader>uu",":bufdo norm u<CR>")
+util.keymap("", "<leader>uu", ":bufdo norm u<CR>")

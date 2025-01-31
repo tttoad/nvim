@@ -16,6 +16,7 @@ function GoAddTagsPlugin()
 		'(4):yaml.',
 		'(5):custom.',
 	})
+
 	local tag = ""
 	if (flags == 2) then
 		tag = "gorm"
@@ -33,9 +34,17 @@ function GoAddTagsPlugin()
 	vim.api.nvim_buf_set_lines(0, linenr - 1, linenr, false, { gohelp.AddTags(source, tag) })
 end
 
+function GoAddTagPlugin()
+	local linenr = vim.api.nvim_win_get_cursor(0)[1]
+	local source = vim.api.nvim_buf_get_lines(0, linenr - 1, linenr, false)[1]
+	print(source,vim.api.nvim_buf_get_lines(0, linenr - 1, linenr, false)[2])
+end
+
 -- util.keymap('', "<F1>", ":GoDocBrowser<CR>")
 -- util.keymap('n', "<leader>fill", ":GoFillStruct<CR>")
 util.keymap('n', "<leader>tg", GoAddTagsPlugin)
+util.keymap('v', "<leader>tc", GoAddTagPlugin)
+
 -- util.keymap('v', "<leader>tg", ": luado return require'lsp.lsp'.GoAddTagsPlugin(line,linenr)<CR>")
 
 vim.g.go_def_mapping_enabled = 0
@@ -91,10 +100,7 @@ cmp.setup({
 		documentation = cmp.config.window.bordered(),
 	}
 })
---
--- nvim-cmp
--- local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities()) --nvim-cmp
--- capabilities.textDocument.completion.completionItem.snippetSupport = true
+
 --
 local on_attach = function(_, bufnr)
 	-- local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
@@ -105,12 +111,9 @@ end
 -- close quickfix
 util.keymap("", "<leader>a", ":cclose<CR>")
 --
--- Setup lspconfig.
-local nvim_lsp = require('lspconfig')
---
--- setup languages
--- GoLang
-nvim_lsp['gopls'].setup {
+local lspconfig = require('lspconfig')
+-- golang
+lspconfig.gopls.setup {
 	cmd = { 'gopls' },
 	on_attach = on_attach,
 	--	capabilities = capabilities,
@@ -165,8 +168,9 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	end,
 })
 
+
 -- lua
-require 'lspconfig'.lua_ls.setup {
+lspconfig.lua_ls.setup {
 	on_init = function(client)
 		local path = client.workspace_folders[1].name
 		if not vim.loop.fs_stat(path .. '/.luarc.json') and not vim.loop.fs_stat(path .. '/.luarc.jsonc') then
@@ -196,12 +200,47 @@ require 'lspconfig'.lua_ls.setup {
 		return true
 	end
 }
--- typescript
-require 'lspconfig'.ts_ls.setup {}
 
+require('nvim-ts-autotag').setup({
+	opts = {
+		-- Defaults
+		enable_close = true,      -- Auto close tags
+		enable_rename = true,     -- Auto rename pairs of tags
+		enable_close_on_slash = false -- Auto close on trailing </
+	},
+	-- Also override individual filetype configs, these take priority.
+	-- Empty by default, useful if one of the "opts" global settings
+	-- doesn't work well in a specific filetype
+	per_filetype = {
+		["html"] = {
+			enable_close = false
+		}
+	}
+})
+
+-- lspconfig.ts_ls.setup {
+-- 	init_options = {
+-- 		plugins = {
+-- 			{
+-- 				name = '@vue/typescript-plugin',
+-- 				location = '/path/to/@vue/language-server',
+-- 				languages = { 'vue' },
+-- 			},
+-- 		},
+-- 	},
+-- }
+
+lspconfig.volar.setup {
+	filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+	init_options = {
+		vue = {
+			hybridMode = false,
+		},
+	},
+}
 --
 -- jsonnet
-require 'lspconfig'.jsonnet_ls.setup {
+lspconfig.jsonnet_ls.setup {
 	ext_vars = {
 		foo = 'bar',
 	},
@@ -227,15 +266,15 @@ require 'lspconfig'.jsonnet_ls.setup {
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 --
-require 'lspconfig'.jsonls.setup {
+lspconfig.jsonls.setup {
 	capabilities = capabilities,
 }
 --
 -- clang
-require 'lspconfig'.clangd.setup {}
+lspconfig.clangd.setup {}
 --
 -- yaml
-require 'lspconfig'.yamlls.setup {
+lspconfig.yamlls.setup {
 	settings = {
 		yaml = {
 			schemas = {
@@ -243,6 +282,22 @@ require 'lspconfig'.yamlls.setup {
 			},
 		},
 	}
+}
+
+lspconfig.sqls.setup {
+	on_attach = function(client, bufnr)
+		require('sqls').on_attach(client, bufnr) -- require sqls.nvim
+	end,
+	settings = {
+		sqls = {
+			connections = {
+				{
+					driver = 'mysql',
+					dataSourceName = 'root:123456@tcp(127.0.0.1:3306)/opamp',
+				}
+			},
+		},
+	},
 }
 --
 -- lsp-config
@@ -266,7 +321,6 @@ vim.keymap.set('n', '<C-;>', vim.lsp.buf.signature_help, bufopts)
 vim.keymap.set('', '<C-C>', vim.lsp.buf.completion, bufopts)
 vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
 vim.keymap.set('', '<leader>rn', vim.lsp.buf.rename, bufopts)
--- vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
 vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
 vim.keymap.set('', '<C-R>', function()
 	vim.lsp.buf.format { async = true }
@@ -299,19 +353,3 @@ cmp.setup.cmdline(':', {
 	}),
 	matching = { disallow_symbol_nonprefix_matching = false }
 })
-
-require 'lspconfig'.sqls.setup {
-	on_attach = function(client, bufnr)
-		require('sqls').on_attach(client, bufnr) -- require sqls.nvim
-	end,
-	settings = {
-		sqls = {
-			connections = {
-				{
-					driver = 'mysql',
-					dataSourceName = 'root:123456@tcp(127.0.0.1:3306)/opamp',
-				}
-			},
-		},
-	},
-}

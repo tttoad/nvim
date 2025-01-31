@@ -27,6 +27,7 @@ util.setVimCommand({
 	"let g:floaterm_keymap_toggle ='<F12>'",
 	"let g:floaterm_autoclose=v:true"
 })
+-- <c+\n> terminal enters selectable mode
 
 util.keymap("", "<leader>fa", "<cmd>FloatermNew --width=0.8 --height=0.8 <CR>")
 util.keymap("", "<leader>lg", "<cmd>FloatermNew --width=3000 --height=3000 lazygit<CR>")
@@ -36,7 +37,7 @@ util.keymap("", "<c-q>", function()
 end)
 
 -- nvim-autopairs
-require("nvim-autopairs").setup({
+ require("nvim-autopairs").setup({
 	disable_filetype = { "TelescopePrompt" },
 })
 

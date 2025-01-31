@@ -126,6 +126,7 @@ dap.configurations.go = {
 		name = 'Debug',
 		request = 'launch',
 		program = "${file}",
+		outputMode = 'remote',
 		env = function()
 			return GetEnvByWorkspace('Debug')
 		end
@@ -135,6 +136,7 @@ dap.configurations.go = {
 		name = 'Debug-args',
 		request = 'launch',
 		program = "${file}",
+		outputMode = 'remote',
 		env = function()
 			return GetEnvByWorkspace('Debug-args')
 		end,
@@ -173,6 +175,7 @@ dap.configurations.go = {
 		name = 'workspace-args',
 		request = 'launch',
 		program = "${workspaceFolder}",
+		outputMode = 'remote',
 		args = function()
 			return GetArgsByWorkspace("workspace-args")
 		end,
@@ -207,6 +210,7 @@ dap.configurations.go = {
 		name = 'attach-remote',
 		request = 'attach',
 		mode = "local",
+		outputMode = 'remote',
 		processId = function()
 			return tonumber(vim.fn.input('PID: '))
 		end,
