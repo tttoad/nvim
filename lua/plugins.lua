@@ -45,8 +45,47 @@ require('packer').startup(function()
 	}
 	use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
 
+
+	-- Required plugins
+	use 'stevearc/dressing.nvim'
+	use 'nvim-lua/plenary.nvim'
+	use 'MunifTanjim/nui.nvim'
+	use 'MeanderingProgrammer/render-markdown.nvim'
+
+	-- Optional dependencies
+	use 'hrsh7th/nvim-cmp'
+	use 'nvim-tree/nvim-web-devicons' -- or use 'echasnovski/mini.icons'
+	use 'HakonHarnes/img-clip.nvim'
+	use 'zbirenbaum/copilot.lua'
+
+	use 'mfussenegger/nvim-jdtls'
+
+	-- Avante.nvim with build process
+	use {
+		'yetone/avante.nvim',
+		-- branch = 'main',
+		tags = "v0.0.19",
+		run = 'make',
+	}
 	vim.opt.completeopt = { "menu", "menuone", "noselect" }
 end)
+
+
+require('avante').setup({
+	provider = "deepseek",
+	auto_suggestions_provider = "deepseek",
+	vendors = {
+		deepseek = {
+			__inherited_from = "openai",
+			api_key_name = "DEEPSEEK_API_KEY",
+			endpoint = "https://api.deepseek.com",
+			model = "deepseek-coder",
+			disable_tools = true,
+		},
+	}
+})
+require('avante_lib').load()
+
 
 local packer = require('packer')
 packer.use({
@@ -74,7 +113,6 @@ packer.use('hrsh7th/cmp-nvim-lsp')
 packer.use('hrsh7th/cmp-buffer')
 packer.use('hrsh7th/cmp-path')
 packer.use('hrsh7th/cmp-cmdline')
-packer.use('hrsh7th/nvim-cmp')
 packer.use('neovim/nvim-lspconfig')
 packer.use('theHamsta/nvim-dap-virtual-text')
 packer.use("jbyuki/one-small-step-for-vimkind")
@@ -113,6 +151,7 @@ local util = require("base.util")
 -- load plugin
 require("small.group")
 require("lsp.dap")
+-- require("lsp.avante")
 require("tree.tree")
 require("base.keymap")
 require("lsp.lsp")

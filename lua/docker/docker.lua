@@ -10,7 +10,7 @@ function _M.runDebugDocker(tar, source, dlvPath, project)
 	local exitCode = os.execute("docker run -v " ..
 	tar ..
 	":" .. source .. " -v " ..
-	dlvPath .. ":/root/delve -w " .. tar .. " -p 38697:38697 -d --name " .. project .. "debug/go:latest .")
+	dlvPath .. ":/root/dlv -w " .. tar .. " -p 38697:38697 -d --name " .. project .. "debug/go:latest .")
 
 	return exitCode
 end

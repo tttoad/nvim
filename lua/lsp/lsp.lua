@@ -37,7 +37,7 @@ end
 function GoAddTagPlugin()
 	local linenr = vim.api.nvim_win_get_cursor(0)[1]
 	local source = vim.api.nvim_buf_get_lines(0, linenr - 1, linenr, false)[1]
-	print(source,vim.api.nvim_buf_get_lines(0, linenr - 1, linenr, false)[2])
+	print(source, vim.api.nvim_buf_get_lines(0, linenr - 1, linenr, false)[2])
 end
 
 -- util.keymap('', "<F1>", ":GoDocBrowser<CR>")
@@ -204,8 +204,8 @@ lspconfig.lua_ls.setup {
 require('nvim-ts-autotag').setup({
 	opts = {
 		-- Defaults
-		enable_close = true,      -- Auto close tags
-		enable_rename = true,     -- Auto rename pairs of tags
+		enable_close = true,    -- Auto close tags
+		enable_rename = true,   -- Auto rename pairs of tags
 		enable_close_on_slash = false -- Auto close on trailing </
 	},
 	-- Also override individual filetype configs, these take priority.
@@ -299,6 +299,13 @@ lspconfig.sqls.setup {
 		},
 	},
 }
+-- java
+local config = {
+    cmd = {'jdtls'},
+    root_dir = vim.fs.dirname(vim.fs.find({'gradlew', '.git', 'mvnw'}, { upward = true })[1]),
+}
+require('jdtls').start_or_attach(config)
+-- require 'lspconfig'.java_language_server.setup {}
 --
 -- lsp-config
 --

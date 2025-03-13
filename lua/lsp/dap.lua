@@ -123,7 +123,7 @@ end
 dap.configurations.go = {
 	{
 		type = 'go',
-		name = 'Debug',
+		name = '1.Debug',
 		request = 'launch',
 		program = "${file}",
 		outputMode = 'remote',
@@ -133,7 +133,7 @@ dap.configurations.go = {
 	},
 	{
 		type = 'go',
-		name = 'Debug-args',
+		name = '2.Debug-args',
 		request = 'launch',
 		program = "${file}",
 		outputMode = 'remote',
@@ -146,7 +146,7 @@ dap.configurations.go = {
 	},
 	{
 		type = 'docker',
-		name = 'local-docker',
+		name = '3.local-docker',
 		request = 'launch',
 		mode = "debug",
 		outputMode = 'remote',
@@ -172,7 +172,7 @@ dap.configurations.go = {
 	},
 	{
 		type = 'go',
-		name = 'workspace-args',
+		name = '4.workspace-args',
 		request = 'launch',
 		program = "${workspaceFolder}",
 		outputMode = 'remote',
@@ -182,7 +182,7 @@ dap.configurations.go = {
 	},
 	{
 		type = 'delve',
-		name = 'remote-default',
+		name = '5.remote-default',
 		request = 'launch',
 		mode = "debug",
 		env = function()
@@ -207,7 +207,7 @@ dap.configurations.go = {
 	},
 	{
 		type = 'delve',
-		name = 'attach-remote',
+		name = '6.attach-remote',
 		request = 'attach',
 		mode = "local",
 		outputMode = 'remote',
@@ -223,7 +223,7 @@ dap.configurations.go = {
 	},
 	{
 		type = 'delve',
-		name = 'remote',
+		name = '7.remote',
 		request = 'launch',
 		mode = "debug",
 		args = function()
