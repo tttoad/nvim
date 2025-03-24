@@ -50,7 +50,7 @@ require('packer').startup(function()
 	use 'stevearc/dressing.nvim'
 	use 'nvim-lua/plenary.nvim'
 	use 'MunifTanjim/nui.nvim'
-	use 'MeanderingProgrammer/render-markdown.nvim'
+	-- use 'MeanderingProgrammer/render-markdown.nvim'
 
 	-- Optional dependencies
 	use 'hrsh7th/nvim-cmp'

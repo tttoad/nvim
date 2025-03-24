@@ -1,7 +1,7 @@
 ARG GO_VERSION=1.23.1
 FROM golang:${GO_VERSION} as golang
 
-FROM base/image:latest
+FROM debug/base:v0.0.1
 
 COPY --from=golang /usr/local/go /usr/local/go
 
