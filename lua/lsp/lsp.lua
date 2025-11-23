@@ -111,9 +111,9 @@ end
 -- close quickfix
 util.keymap("", "<leader>a", ":cclose<CR>")
 --
-local lspconfig = require('lspconfig')
 -- golang
-lspconfig.gopls.setup {
+vim.lsp.enable('gopls')
+vim.lsp.config('gopls', {
 	cmd = { 'gopls' },
 	on_attach = on_attach,
 	--	capabilities = capabilities,
@@ -131,7 +131,26 @@ lspconfig.gopls.setup {
 	init_options = {
 		usePlaceholders = true,
 	}
-}
+})
+-- lspconfig.gopls.setup {
+-- 	cmd = { 'gopls' },
+-- 	on_attach = on_attach,
+-- 	--	capabilities = capabilities,
+-- 	settings = {
+-- 		gopls = {
+-- 			experimentalPostfixCompletions = true,
+-- 			analyses = {
+-- 				unusedparams = true,
+-- 				shadow = true,
+-- 			},
+-- 			staticcheck = true,
+-- 			gofumpt = true,
+-- 		},
+-- 	},
+-- 	init_options = {
+-- 		usePlaceholders = true,
+-- 	}
+-- }
 
 function CustomGoFlags()
 	local flags = vim.fn.input("GOFLAGS:")
@@ -170,7 +189,8 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 
 -- lua
-lspconfig.lua_ls.setup {
+vim.lsp.enable('lua_ls')
+vim.lsp.config('lua_ls', {
 	on_init = function(client)
 		local path = client.workspace_folders[1].name
 		if not vim.loop.fs_stat(path .. '/.luarc.json') and not vim.loop.fs_stat(path .. '/.luarc.jsonc') then
@@ -199,7 +219,8 @@ lspconfig.lua_ls.setup {
 		end
 		return true
 	end
-}
+
+})
 
 require('nvim-ts-autotag').setup({
 	opts = {
@@ -230,17 +251,20 @@ require('nvim-ts-autotag').setup({
 -- 	},
 -- }
 
-lspconfig.volar.setup {
+vim.lsp.enable('volar')
+vim.lsp.config('volar', {
 	filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
 	init_options = {
 		vue = {
 			hybridMode = false,
 		},
 	},
-}
+
+})
 --
 -- jsonnet
-lspconfig.jsonnet_ls.setup {
+vim.lsp.enable('jsonnet_ls')
+vim.lsp.config('jsonnet_ls', {
 	ext_vars = {
 		foo = 'bar',
 	},
@@ -259,22 +283,38 @@ lspconfig.jsonnet_ls.setup {
 		StripComments       = false,
 		StripAllButComments = false,
 	},
-}
---
+})
+
+-- rust
+vim.lsp.enable('rust_analyzer')
+vim.lsp.config('rust_analyzer', {
+	settings = {
+		['rust-analyzer'] = {
+			diagnostics = {
+				enable = false,
+			}
+		}
+	}
+})
+
 -- josn
 --Enable (broadcasting) snippet capability for completion
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 --
-lspconfig.jsonls.setup {
+
+vim.lsp.enable('jsonls')
+vim.lsp.config('jsonls', {
 	capabilities = capabilities,
-}
+})
 --
 -- clang
-lspconfig.clangd.setup {}
+vim.lsp.enable('clangd')
+vim.lsp.config('clangd', {})
 --
 -- yaml
-lspconfig.yamlls.setup {
+vim.lsp.enable('yamlls')
+vim.lsp.config('yamlls', {
 	settings = {
 		yaml = {
 			schemas = {
@@ -282,9 +322,11 @@ lspconfig.yamlls.setup {
 			},
 		},
 	}
-}
+})
 
-lspconfig.sqls.setup {
+
+vim.lsp.enable('sqls')
+vim.lsp.config('sqls', {
 	on_attach = function(client, bufnr)
 		require('sqls').on_attach(client, bufnr) -- require sqls.nvim
 	end,
@@ -298,7 +340,8 @@ lspconfig.sqls.setup {
 			},
 		},
 	},
-}
+})
+
 -- -- java
 -- local config = {
 --     cmd = {'jdtls'},

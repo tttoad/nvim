@@ -1,6 +1,19 @@
-FROM ubuntu:18.04
+FROM ubuntu:24.04
 
-RUN sed -i s@/ports.ubuntu.com@/mirrors.aliyun.com@g /etc/apt/sources.list
+RUN cat > /etc/apt/sources.list.d/ubuntu.sources << 'EOF'
+Types: deb
+URIs: http://mirrors.aliyun.com/ubuntu-ports
+Suites: noble noble-updates noble-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+Types: deb
+URIs: http://mirrors.aliyun.com/ubuntu-ports
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+EOF
+
 RUN apt update
 RUN apt upgrade -y
 RUN apt install -y ca-certificates make git net-tools gcc

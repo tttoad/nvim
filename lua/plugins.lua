@@ -30,7 +30,7 @@ require('packer').startup(function()
 		-- tag = 'release' -- To use the latest release (do not use this if you run Neovim nightly or dev builds!)
 	}
 
-	use 'p00f/nvim-ts-rainbow'
+	-- use 'p00f/nvim-ts-rainbow'
 
 	use 'mbbill/undotree'
 
