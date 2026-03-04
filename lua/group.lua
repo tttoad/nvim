@@ -25,7 +25,8 @@ util.setVimCommand({
 	"let g:floaterm_keymap_prev ='<F9>'",
 	"let g:floaterm_keymap_next ='<F10>'",
 	"let g:floaterm_keymap_toggle ='<F12>'",
-	"let g:floaterm_autoclose=v:true"
+	"let g:floaterm_autoclose=v:true",
+	"let g:floaterm_position='bottom'"
 })
 -- <c+\n> terminal enters selectable mode
 

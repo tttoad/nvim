@@ -94,6 +94,7 @@ util.keymap("n", "<leader>dt", function() require 'dap'.terminate() end)
 util.keymap("n", "<leader>ds", function() CloseDebug() end)
 util.keymap('n', '<Leader>dl', function() require('dap').run_last() end)
 util.keymap("n", "<leader>dc", function() require 'dap'.continue() end)
+util.keymap("n", "<leader>dcj", function() require 'dap'.continue() end)
 util.keymap("n", "<leader>dlb", function() require 'dap'.list_breakpoints() end)
 util.keymap("n", "<leader>dcb", function() require 'dap'.clear_breakpoints() end)
 util.keymap("n", "<F5>", function() require 'dap'.step_over() end)
@@ -189,7 +190,7 @@ dap.configurations.go = {
 		type = 'delve',
 		name = '5.remote-default',
 		request = 'launch',
-		mode ="exec",
+		mode = "exec",
 		env = function()
 			return GetEnvByWorkspace('remote-default')
 		end,

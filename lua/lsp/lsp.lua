@@ -111,8 +111,7 @@ end
 -- close quickfix
 util.keymap("", "<leader>a", ":cclose<CR>")
 --
--- golang
-vim.lsp.enable('gopls')
+-- golag
 vim.lsp.config('gopls', {
 	cmd = { 'gopls' },
 	on_attach = on_attach,
@@ -132,6 +131,8 @@ vim.lsp.config('gopls', {
 		usePlaceholders = true,
 	}
 })
+
+vim.lsp.enable('gopls')
 -- lspconfig.gopls.setup {
 -- 	cmd = { 'gopls' },
 -- 	on_attach = on_attach,
@@ -189,7 +190,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 
 -- lua
-vim.lsp.enable('lua_ls')
 vim.lsp.config('lua_ls', {
 	on_init = function(client)
 		local path = client.workspace_folders[1].name
@@ -221,8 +221,9 @@ vim.lsp.config('lua_ls', {
 	end
 
 })
+vim.lsp.enable('lua_ls')
 
-require('nvim-ts-autotag').setup({
+vim.lsp.config('nvim-ts-autotag', {
 	opts = {
 		-- Defaults
 		enable_close = true,    -- Auto close tags
@@ -237,7 +238,9 @@ require('nvim-ts-autotag').setup({
 			enable_close = false
 		}
 	}
+
 })
+vim.lsp.enable('nvim-ts-autotag')
 
 -- lspconfig.ts_ls.setup {
 -- 	init_options = {
@@ -251,19 +254,86 @@ require('nvim-ts-autotag').setup({
 -- 	},
 -- }
 
-vim.lsp.enable('volar')
-vim.lsp.config('volar', {
-	filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
-	init_options = {
-		vue = {
-			hybridMode = false,
+-- vue
+local vue_language_server_path = '/Users/todli/.nvm/versions/node/v22.12.0/lib/node_modules/@vue/language-server'
+local tsserver_filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' }
+local vue_plugin = {
+	name = '@vue/typescript-plugin',
+	location = vue_language_server_path,
+	languages = { 'vue' },
+	configNamespace = 'typescript',
+}
+local vtsls_config = {
+	settings = {
+		vtsls = {
+			tsserver = {
+				globalPlugins = {
+					vue_plugin,
+				},
+			},
 		},
 	},
+	filetypes = tsserver_filetypes,
+}
 
-})
+local ts_ls_config = {
+	init_options = {
+		plugins = {
+			vue_plugin,
+		},
+	},
+	filetypes = tsserver_filetypes,
+}
+
+-- If you are not on most recent `nvim-lspconfig` or you want to override
+local vue_ls_config = {
+	on_init = function(client)
+		client.handlers['tsserver/request'] = function(_, result, context)
+			local ts_clients = vim.lsp.get_clients({ bufnr = context.bufnr, name = 'ts_ls' })
+			local vtsls_clients = vim.lsp.get_clients({ bufnr = context.bufnr, name = 'vtsls' })
+			local clients = {}
+
+			vim.list_extend(clients, ts_clients)
+			vim.list_extend(clients, vtsls_clients)
+
+			if #clients == 0 then
+				vim.notify('Could not find `vtsls` or `ts_ls` lsp client, `vue_ls` would not work without it.',
+					vim.log.levels.ERROR)
+				return
+			end
+			local ts_client = clients[1]
+
+			local param = unpack(result)
+			local id, command, payload = unpack(param)
+			ts_client:exec_cmd({
+				title = 'vue_request_forward', -- You can give title anything as it's used to represent a command in the UI, `:h Client:exec_cmd`
+				command = 'typescript.tsserverRequest',
+				arguments = {
+					command,
+					payload,
+				},
+			}, { bufnr = context.bufnr }, function(_, r)
+				local response = r and r.body
+				-- TODO: handle error or response nil here, e.g. logging
+				-- NOTE: Do NOT return if there's an error or no response, just return nil back to the vue_ls to prevent memory leak
+				local response_data = { { id, response } }
+
+				---@diagnostic disable-next-line: param-type-mismatch
+				client:notify('tsserver/response', response_data)
+			end)
+		end
+	end,
+}
+-- nvim 0.11 or above
+--
+vim.lsp.config('vtsls', vtsls_config)
+vim.lsp.config('vue_ls', vue_ls_config)
+vim.lsp.config('ts_ls', ts_ls_config)
+-- vim.lsp.enable('vue_ls')
+-- vim.lsp.enable('ts_ls')
+vim.lsp.enable({ 'vtsls', 'vue_ls' }) -- If using `ts_ls` replace `vtsls` to `ts_ls`
 --
 -- jsonnet
-vim.lsp.enable('jsonnet_ls')
 vim.lsp.config('jsonnet_ls', {
 	ext_vars = {
 		foo = 'bar',
@@ -284,9 +354,9 @@ vim.lsp.config('jsonnet_ls', {
 		StripAllButComments = false,
 	},
 })
+vim.lsp.enable('jsonnet_ls')
 
 -- rust
-vim.lsp.enable('rust_analyzer')
 vim.lsp.config('rust_analyzer', {
 	settings = {
 		['rust-analyzer'] = {
@@ -297,23 +367,24 @@ vim.lsp.config('rust_analyzer', {
 	}
 })
 
+vim.lsp.enable('rust_analyzer')
+
 -- josn
 --Enable (broadcasting) snippet capability for completion
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 --
 
-vim.lsp.enable('jsonls')
 vim.lsp.config('jsonls', {
 	capabilities = capabilities,
 })
+vim.lsp.enable('jsonls')
 --
 -- clang
-vim.lsp.enable('clangd')
 vim.lsp.config('clangd', {})
+vim.lsp.enable('clangd')
 --
 -- yaml
-vim.lsp.enable('yamlls')
 vim.lsp.config('yamlls', {
 	settings = {
 		yaml = {
@@ -323,9 +394,9 @@ vim.lsp.config('yamlls', {
 		},
 	}
 })
+vim.lsp.enable('yamlls')
 
 
-vim.lsp.enable('sqls')
 vim.lsp.config('sqls', {
 	on_attach = function(client, bufnr)
 		require('sqls').on_attach(client, bufnr) -- require sqls.nvim
@@ -341,6 +412,7 @@ vim.lsp.config('sqls', {
 		},
 	},
 })
+vim.lsp.enable('sqls')
 
 -- -- java
 -- local config = {

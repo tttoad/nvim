@@ -46,6 +46,8 @@ util.setVimCommand({
 	'set number',
 	'set ignorecase',
 	'set encoding=UTF-8',
+	'set fileencoding=utf-8',
+	'set fileencodings=utf-8,gbk,ucs-2,utf-16',
 	-- 'set number',
 	--set lines=60
 	--set columns=200

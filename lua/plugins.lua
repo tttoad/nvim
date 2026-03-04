@@ -47,46 +47,197 @@ require('packer').startup(function()
 
 
 	-- Required plugins
-	use 'stevearc/dressing.nvim'
-	use 'nvim-lua/plenary.nvim'
-	use 'MunifTanjim/nui.nvim'
-	-- use 'MeanderingProgrammer/render-markdown.nvim'
-
+	use {
+		"ravitemer/mcphub.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+		},
+		config = function()
+			require("mcphub").setup({
+				use_bundled_binary = false, -- Use local `mcp-hub` binary
+				cmd = "mcp-hub",
+			})
+		end,
+	}
 	-- Optional dependencies
 	use 'hrsh7th/nvim-cmp'
 	use 'nvim-tree/nvim-web-devicons' -- or use 'echasnovski/mini.icons'
-	use 'HakonHarnes/img-clip.nvim'
-	use 'zbirenbaum/copilot.lua'
+	-- use 'zbirenbaum/copilot.lua'
 
 	use 'mfussenegger/nvim-jdtls'
+	use 'stevearc/dressing.nvim'
 
 	-- Avante.nvim with build process
+	use 'nvim-lua/plenary.nvim'
+	use 'MunifTanjim/nui.nvim'
+	use 'MeanderingProgrammer/render-markdown.nvim'
 	use {
 		'yetone/avante.nvim',
 		-- branch = 'main',
-		tags = "v0.0.19",
+		-- tags = "v0.0.19",
 		run = 'make',
+	}
+	use {
+		"nickjvandyke/opencode.nvim",
+		tag = "*", -- 对应 lazy 的 version = "*"
+		requires = {
+			-- packer 中 dependencies 对应 requires
+			{ "folke/snacks.nvim" },
+		},
+		config = function()
+			-- 1. 配置 Snacks.nvim (如果需要自定义)
+			require("snacks").setup({
+				input = { enabled = true }, -- 开启输入增强
+				picker = {
+					enabled = true,
+					actions = {
+						opencode_send = function(...) return require("opencode").snacks_picker_send(...) end,
+					},
+					win = {
+						input = {
+							keys = {
+								["<leader>o"] = { "opencode_send", mode = { "n", "i" } },
+							},
+						},
+					},
+				},
+			})
+
+			-- 2. 配置 Opencode 选项
+			-- 注意：原文使用 vim.g.opencode_opts，这通常是全局变量配置
+			vim.g.opencode_opts = {
+				-- 你的具体配置项写在这里
+				lsp = {
+					enable = true
+				}
+			}
+
+
+			vim.o.autoread = true -- 必须开启
+
+
+			-- 修复被覆盖的默认增减数字功能
+			-- vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
+			-- vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
+		end
 	}
 	vim.opt.completeopt = { "menu", "menuone", "noselect" }
 end)
 
-
-require('avante').setup({
-	provider = "deepseek",
-	auto_suggestions_provider = "deepseek",
-	vendors = {
-		deepseek = {
-			__inherited_from = "openai",
-			api_key_name = "DEEPSEEK_API_KEY",
-			endpoint = "https://api.deepseek.com",
-			model = "deepseek-coder",
-			disable_tools = true,
-		},
-	}
+require('render-markdown').setup({
+	file_types = { "markdown", "Avante" }
 })
-require('avante_lib').load()
+-- 3. 快捷键设置 (Keymaps)
+local opencode = require("opencode")
 
+-- 基础问答与操作
+vim.keymap.set({ "n", "x" }, "<leader>o", function() opencode.ask("@this: ", { submit = true }) end,
+	{ desc = "Ask opencode…" })
+vim.keymap.set({ "n", "x" }, "<leader>x", function() opencode.select() end, { desc = "Execute opencode action…" })
+vim.keymap.set({ "n", "t" }, "<leader>aa", function() opencode.toggle() end, { desc = "Toggle opencode" })
 
+-- Operator 操作符模式
+vim.keymap.set({ "n", "x" }, "go", function() return opencode.operator("@this ") end,
+	{ desc = "Add range to opencode", expr = true })
+vim.keymap.set("n", "goo", function() return opencode.operator("@this ") .. "_" end,
+	{ desc = "Add line to opencode", expr = true })
+
+-- 滚动控制
+vim.keymap.set("n", "<S-C-u>", function() opencode.command("session.half.page.up") end,
+	{ desc = "Scroll opencode up" })
+vim.keymap.set("n", "<S-C-d>", function() opencode.command("session.half.page.down") end,
+	{ desc = "Scroll opencode down" })
+
+-- require('avante').setup({
+-- 	-- system_prompt as function ensures LLM always has latest MCP server state
+-- 	-- This is evaluated for every message, even in existing chats
+-- 	system_prompt = function()
+-- 		local hub = require("mcphub").get_hub_instance()
+-- 		return hub and hub:get_active_servers_prompt() or ""
+-- 	end,
+-- 	-- debug = true,
+-- 	-- Using function prevents requiring mcphub before it's loaded
+-- 	custom_tools = function()
+-- 		return {
+-- 			require("mcphub.extensions.avante").mcp_tool(),
+-- 		}
+-- 	end,
+-- 	instructions_file = "avante.md",
+-- 	provider = "wq",
+-- 	providers = {
+-- 		claude = {
+-- 			endpoint = "https://api.anthropic.com",
+-- 			model = "claude-opus-4-5-20251101",
+-- 			timeout = 30000, -- Timeout in milliseconds
+-- 			extra_request_body = {
+-- 				temperature = 0.75,
+-- 				max_tokens = 20480,
+-- 			},
+-- 		},
+-- 		deepseek = {
+-- 			__inherited_from = "openai",
+-- 			api_key_name = "DEEPSEEK_API_KEY",
+-- 			endpoint = "https://api.deepseek.com",
+-- 			model = "deepseek-coder",
+-- 		},
+-- 		agentrouter= {
+-- 			__inherited_from = "openai",
+-- 		    endpoint = "https://agentrouter.org/v1",
+-- 			model = "glm-4.6",
+-- 			api_key_name = "AGENTROUTER_API_KEY",
+-- 		},
+-- 		minimax = {
+-- 			__inherited_from = "openai",
+-- 			api_key_name = "MINIMAX_API_KEY",
+-- 			endpoint = "https://api.minimaxi.com/v1",
+-- 			model = "codex-MiniMax-M2.1",
+-- 		},
+-- 		moss = {
+-- 			__inherited_from = "openai",
+-- 			api_key_name = "MOSS_API_KEY",
+-- 			endpoint = "https://moss.starbucks.net/v1",
+-- 			model = "qwen3:235b",
+-- 		},
+-- 		wq = {
+-- 			__inherited_from = "openai",
+-- 			api_key_name = "WQ_API_KEY",
+-- 			endpoint = "https://wanqing.streamlakeapi.com/api/gateway/v1/endpoints",
+-- 			model = "kat-coder-pro-v1",
+-- 		},
+-- 		gemini = {
+-- 			endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
+-- 			model = "gemini-3-flash-preview",
+-- 			max_tokens = 8192, -- 3.0 支持更长的上下文，可以适当调高
+-- 		},
+-- 	},
+-- 	rag_service = {
+-- 		enabled = true,                                            -- 开启 RAG
+-- 		runner = "docker",                                         -- RAG 服务的运行器 (可以使用 docker 或 nix)
+-- 		llm = {                                                    -- RAG 服务使用的语言模型 (LLM) 配置
+-- 			provider = "openai",                                   -- LLM 提供者
+-- 			endpoint = "https://api.minimaxi.com/v1",              -- LLM API 端点
+-- 			api_key = "MINIMAX_API_KEY",                           -- LLM API 密钥的环境变量名称
+-- 			model = "codex-MiniMax-M2.1",                          -- LLM 模型名称
+-- 			extra = nil,                                           -- LLM 的额外配置选项
+-- 		},
+-- 		embed = {                                                  -- RAG 服务使用的嵌入模型配置
+-- 			provider = "dashscope",                                -- 嵌入提供者
+-- 			endpoint = "https://dashscope.aliyuncs.com/compatible-mode/v1", -- 嵌入 API 端点
+-- 			api_key = "QW_API_KEY",                                -- 嵌入 API 密钥的环境变量名称
+-- 			model = "text-embedding-v4",
+-- 			extra = {                                              -- Extra configuration options for the Embedding model (optional)
+-- 				embed_batch_size = 10,
+-- 			},
+-- 		},
+-- 		env = {
+-- 			LOG_LEVEL = "debug",
+-- 		},
+-- 		image = "rag-service:latest",
+-- 		host_mount = "/Users/todli/work",
+-- 		docker_extra_args = "", -- 传递给 docker 命令的额外参数
+--
+-- 	}
+-- })
 local packer = require('packer')
 packer.use({
 	'kyazdani42/nvim-tree.lua',
@@ -125,7 +276,7 @@ packer.use({
 packer.use('ravenxrz/DAPInstall.nvim')
 packer.use({
 	'mfussenegger/nvim-dap',
-	tag = '0.9.0'
+	tag = '0.10.0'
 })
 packer.use('windwp/nvim-ts-autotag')
 
