@@ -1,5 +1,5 @@
 local _M = {}
-local log = require('base.log')
+local log = require('config.log')
 
 function _M.cmd(cmdStr)
 	vim.api.nvim_command(cmdStr)

@@ -1,2 +1,2 @@
-package.path =package.path..";"..os.getenv("HOME").."/.config/nvim/lua/json/?.lua"
-require 'plugins'
+-- bootstrap lazy.nvim, LazyVim and your plugins
+require("config.lazy")
