@@ -1,4 +1,8 @@
 local log = require("base.log")
+vim.g.opencode_opts = {
+  lsp = { enable = true }
+}
+
 require('packer').startup(function()
 	use 'wbthomason/packer.nvim'
 	use "morhetz/gruvbox"
@@ -102,16 +106,6 @@ require('packer').startup(function()
 					},
 				},
 			})
-
-			-- 2. 配置 Opencode 选项
-			-- 注意：原文使用 vim.g.opencode_opts，这通常是全局变量配置
-			vim.g.opencode_opts = {
-				-- 你的具体配置项写在这里
-				lsp = {
-					enable = true
-				}
-			}
-
 
 			vim.o.autoread = true -- 必须开启
 
